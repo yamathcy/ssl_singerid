@@ -25,9 +25,8 @@ cs = ConfigStore.instance()
 cs.store(name="config", node=Config)
 #torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
-
+@hydra.main(config_path="src/config.yaml")
 def main(conf: Config):
-    hydra.initialize(config_path="config")
     print(hydra.utils.get_original_cwd())
     dir = hydra.utils.get_original_cwd() + "/mlruns"
     if not os.path.exists(dir):
