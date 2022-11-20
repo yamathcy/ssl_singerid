@@ -22,11 +22,11 @@ main.py
 メインの根幹部分．ここにロジックをまとめる．
 """
 cs = ConfigStore.instance()
-cs.store(name="config", node=Config)
+cs.store(name="conf", node=Config)
 #torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 
-@hydra.main(config_name='config')
+@hydra.main(config_name='conf')
 def main(conf: Config):
     print(hydra.utils.get_original_cwd())
     dir = hydra.utils.get_original_cwd() + "/mlruns"
