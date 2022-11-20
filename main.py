@@ -62,12 +62,20 @@ def main(conf: Config):
 
     # データセットの読み込み
     data_path = 'data/ESC-50-master'
-    data_path = os.path.join(hydra.utils.get_original_cwd(),data_path,'meta/esc50.csv')
+    data_path = os.path.join(hydra.utils.get_original_cwd(), data_path,'meta/esc50.csv')
     df = pd.read_csv(data_path)
-    train_data = df.query('fold <= 3')
-    valid_data = df[df['fold']==4]
-    test_data = df[df['fold']==5]
-    
+
+    # ラベルをsplit
+    train_label= df[df['fold']<=3]
+    valid_label = df[df['fold']==4]
+    test_label = df[df['fold']==5]
+
+    # 音ファイルの読み込み
+    audio_path = os.path.join(hydra.utils.get_original_cwd(), data_path, "audio")
+    train_data = ESC50(label_df=train_label, base=audio_path)
+    valid_data = ESC50(label_df=valid_label, base=audio_path)
+    test_data = ESC50(label_df=test_label, base=audio_path)
+
     # 各データローダーの用意
     train_loader = DataLoader(train_data, batch_size=conf.batch_size, shuffle=True)
     valid_loader = DataLoader(valid_data, batch_size=1, shuffle=False)
