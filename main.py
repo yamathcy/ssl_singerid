@@ -26,7 +26,7 @@ cs.store(name="conf", node=Config)
 #torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 
-@hydra.main(config_name='conf')
+@hydra.main(config_path="conf")
 def main(conf: Config):
     print(hydra.utils.get_original_cwd())
     dir = hydra.utils.get_original_cwd() + "/mlruns"
