@@ -91,5 +91,5 @@ def main(conf: Config):
     # モデルの保存
     mlf_logger.experiment.log_artifact(mlf_logger.run_id, out_model_fn)
 
-if __name__ == "main":
+if __name__ == "__main__":
     main()
