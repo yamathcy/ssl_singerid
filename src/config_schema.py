@@ -10,7 +10,7 @@ class Config:
     model:str = "cnn"
     epoch:int = 100
     batch_size:int = 16
-    save_name:str = "exp.pt"
+    savename:str = "exp.pt"
 
 
 # MLFlowにパラメータを記録する
