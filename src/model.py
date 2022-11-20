@@ -208,12 +208,12 @@ class ResNet(pl.LightningModule):
         # 畳み込み層
         
         self.layer1 = Res_2d(1, num_channels, stride=2)
-        self.layer2 = Res_2d(num_channels, num_channels, stride=2)
-        self.layer3 = Res_2d(num_channels, num_channels*2, stride=2)
-        self.layer4 = Res_2d(num_channels*2, num_channels*2, stride=2)
-        self.layer5 = Res_2d(num_channels*2, num_channels*2, stride=2)
-        self.layer6 = Res_2d(num_channels*2, num_channels*2, stride=2)
-        self.layer7 = Res_2d(num_channels*2, num_channels*4, stride=2)
+        self.layer2 = Res_2d(num_channels, num_channels)
+        self.layer3 = Res_2d(num_channels, num_channels*2)
+        self.layer4 = Res_2d(num_channels*2, num_channels*2)
+        self.layer5 = Res_2d(num_channels*2, num_channels*2)
+        self.layer6 = Res_2d(num_channels*2, num_channels*2)
+        self.layer7 = Res_2d(num_channels*2, num_channels*4)
 
         # 全結合層
         self.dense1 = nn.Linear(num_channels * 8, num_channels * 2)
