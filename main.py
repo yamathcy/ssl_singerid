@@ -62,7 +62,8 @@ def main(conf: Config):
 
     # データセットの読み込み
     data_path = './data/ESC-50-master'
-    df = pd.read_csv(os.path.join(data_path,'meta/esc50.csv'))
+    data_path = os.path.join(data_path,'meta/esc50.csv')
+    df = pd.read_csv(data_path)
     train_data = df.query('fold <= 3')
     valid_data = df[df['fold']==4]
     test_data = df[df['fold']==5]
