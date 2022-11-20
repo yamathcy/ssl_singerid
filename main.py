@@ -61,8 +61,8 @@ def main(conf: Config):
         os.makedirs(out_model_fn)
 
     # データセットの読み込み
-    data_path = 'data/ESC-50-master'
-    df = pd.read_csv(os.path.join(os.chdir(),data_path,'meta/esc50.csv'))
+    data_path = './data/ESC-50-master'
+    df = pd.read_csv(os.path.join(data_path,'meta/esc50.csv'))
     train_data = df.query('fold <= 3')
     valid_data = df[df['fold']==4]
     test_data = df[df['fold']==5]
