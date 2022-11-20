@@ -2,3 +2,4 @@ experiment_name: 'ESC-50 audio classification'
 model: 'cnn'
 epoch: 100
 batch_size: 16
+save_name: 'exp.pt'
