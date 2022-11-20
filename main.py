@@ -14,7 +14,7 @@ from src.eval import *
 from src.dataio import *
 from src.preprocess import *
 from src.utils import *
-from src.config import Config
+from src.config_schema import Config
 
 
 """
@@ -26,7 +26,7 @@ cs.store(name="conf", node=Config)
 #torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 
-@hydra.main(config_path="src/conf")
+@hydra.main(config_name='config')
 def main(conf: Config):
     print(hydra.utils.get_original_cwd())
     dir = hydra.utils.get_original_cwd() + "/mlruns"
