@@ -62,8 +62,8 @@ def main(conf: Config):
 
     # データセットの読み込み
     data_path = 'data/ESC-50-master'
-    data_path = os.path.join(hydra.utils.get_original_cwd(), data_path,'meta/esc50.csv')
-    df = pd.read_csv(data_path)
+    meta_path = os.path.join(hydra.utils.get_original_cwd(), data_path,'meta/esc50.csv')
+    df = pd.read_csv(meta_path)
 
     # ラベルをsplit
     train_label= df[df['fold']<=3]
