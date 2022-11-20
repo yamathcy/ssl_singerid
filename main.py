@@ -83,7 +83,7 @@ def main(conf: Config):
         raise NotImplementedError
 
     # 学習
-    mlf_logger = MLFlowLogger(experiment_name=conf.experiment_name, tracking_uri=tracking_uri, run_id=mlflow.active_run().info.run_id)
+    mlf_logger = MLFlowLogger(experiment_name=conf.experiment_name, tracking_uri=tracking_uri)
     model, trainer = train(model, train_loader, valid_loader, max_epochs=conf.epoch, logger=mlf_logger)
 
     # 評価
