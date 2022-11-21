@@ -90,6 +90,13 @@ def main(conf: Config):
     else:
         raise NotImplementedError
 
+    SEED = 42
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True)
+    pl.seed_everything(SEED)
+    np.random.seed(SEED)
+
     # 学習
     mlf_logger = MLFlowLogger(experiment_name=conf.experiment_name, tracking_uri=tracking_uri)
     model, trainer = train(model, train_loader, valid_loader, max_epochs=conf.epoch, logger=mlf_logger)
