@@ -1,0 +1,12 @@
+dataclasses
+hydra-core
+librosa
+mlflow
+pytorch-lightning
+torch
+torchaudio
+torchmetrics
+torchsummary
+torchvision
+tqdm
+
