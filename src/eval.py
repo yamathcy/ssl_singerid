@@ -20,7 +20,7 @@ def evaluation(model, trainer, test_loader):
     :param test_loader:
     :return:
     """
-    trainer.test(model, test_loader, ckpt_path="last")
+    trainer.test(model, test_loader)
 
 
 def single_test(model:torch.nn.Module, data):
