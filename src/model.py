@@ -174,9 +174,9 @@ class SimpleCNNModel(pl.LightningModule):
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
         out = self(x)
-        self.log('test_accuracy', self.test_acc(out,y), on_epoch=False, on_step=False)
-        self.log('test_f1', self.test_f1(out, y), on_epoch=False, on_step=False)
-        self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=False, on_step=False)
+        self.log('test_accuracy', self.test_acc(out,y), on_epoch=True, on_step=False)
+        self.log('test_f1', self.test_f1(out, y), on_epoch=True, on_step=False)
+        self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
         # self.log('test_accuracy', self.confusion(out, y), on_epoch=False, on_step=False)
 
 
