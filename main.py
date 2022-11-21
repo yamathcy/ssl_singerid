@@ -78,8 +78,8 @@ def main(conf: Config):
 
     # 各データローダーの用意
     train_loader = DataLoader(train_data, batch_size=conf.batch_size, shuffle=True)
-    valid_loader = DataLoader(valid_data, batch_size=1, shuffle=False)
-    test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
+    valid_loader = DataLoader(valid_data, batch_size=16, shuffle=False)
+    test_loader = DataLoader(test_data, batch_size=16, shuffle=False)
 
     # モデル
     # パラメータによって条件を分岐
