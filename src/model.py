@@ -216,7 +216,7 @@ class ResNet(pl.LightningModule):
         self.layer7 = Res_2d(num_channels*2, num_channels*4)
 
         # 全結合層
-        self.dense1 = nn.Linear(num_channels * 8, num_channels * 2)
+        self.dense1 = nn.Linear(num_channels * 4, num_channels * 2)
         self.dense2 = nn.Linear(num_channels * 2, num_classes)
         self.dropout = nn.Dropout(0.5)
         self.relu = nn.ReLU()
