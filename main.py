@@ -105,7 +105,7 @@ def main(conf: Config):
     evaluation(model, trainer, test_loader)
 
     # パラメータのロギング
-    mlflow.log_params(conf)
+    mlf_logger.log_params(conf)
     # モデルの保存
     mlf_logger.experiment.log_artifact(mlf_logger.run_id, out_model_fn)
 
