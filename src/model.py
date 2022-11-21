@@ -51,6 +51,7 @@ class ConvBlock(nn.Module):
         out = self.dropout(x)
         return out
 
+# ResNetブロック
 class Res_2d(nn.Module):
     def __init__(self, input_channels, output_channels, shape=3, stride=2):
         super().__init__()
@@ -59,7 +60,6 @@ class Res_2d(nn.Module):
         self.bn_1 = nn.BatchNorm2d(output_channels)
         self.conv_2 = nn.Conv2d(output_channels, output_channels, shape, padding=shape//2)
         self.bn_2 = nn.BatchNorm2d(output_channels)
-
 
         # Residual connection 
         self.diff = False
@@ -77,7 +77,7 @@ class Res_2d(nn.Module):
         out = self.relu(out)
         return out
 
-
+# 8層のCNNモデル
 class SimpleCNNModel(pl.LightningModule):
     def __init__(self, num_channels=32,
                  sample_rate=44100,
@@ -180,6 +180,7 @@ class SimpleCNNModel(pl.LightningModule):
         # self.log('test_accuracy', self.confusion(out, y), on_epoch=False, on_step=False)
 
 
+# 7層のResnetモデル
 class ResNet(pl.LightningModule):
     def __init__(self, num_channels=32,
                  sample_rate=44100,

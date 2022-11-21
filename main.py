@@ -27,35 +27,31 @@ cs.store(name="config", node=Config)
 
 @hydra.main(config_name="config")
 def main(conf: Config):
+
+    # ランダムのシードを決定
+    SEED = 42
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True)
+    pl.seed_everything(SEED)
+    np.random.seed(SEED)
+
+    # トラッキングを行う場所をチェックし，ログを収納するディレクトリを指定
     print(hydra.utils.get_original_cwd())
     dir = hydra.utils.get_original_cwd() + "/mlruns"
     if not os.path.exists(dir):
         os.makedirs(dir)
+
+    # mlflowの準備
     mlflow.set_tracking_uri(dir)
     tracking_uri = mlflow.get_tracking_uri()
-
     mlflow.set_experiment(conf.experiment_name)
 
-    # コマンドライン引数による実験条件の指定を可能にする (argparser用)
-    # parser = argparse.ArgumentParser(description="experiment")
-    # parser.add_argument(
-    #     "--batch_size", type=int, default=32,
-    #     help="Batch size during training Default: 32"
-    # )
-    # parser.add_argument(
-    #     "--model_path", type=str, default="models",
-    #     help="the model pt file path Default: models"
-    # )
-    # parser.add_argument(
-    #     "--savename", type=str, default="run",
-    #     help="the model pt file name Default: run"
-    # )
-    # args = parser.parse_args()
-
+    # GPUの準備
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    # out_model_fn = './model/%s/' % (args.savename)
+    # 学習したモデルのパラメータ
     out_model_fn = './model/%s' % (conf.savename)
     if not os.path.exists(out_model_fn):
         os.makedirs(out_model_fn)
@@ -89,13 +85,6 @@ def main(conf: Config):
         model = ResNet()
     else:
         raise NotImplementedError
-
-    SEED = 42
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
-    torch.use_deterministic_algorithms(True)
-    pl.seed_everything(SEED)
-    np.random.seed(SEED)
 
     # 学習
     mlf_logger = MLFlowLogger(experiment_name=conf.experiment_name, tracking_uri=tracking_uri)
