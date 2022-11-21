@@ -52,19 +52,19 @@ class ConvBlock(nn.Module):
         return out
 
 class Res_2d(nn.Module):
-    def __init__(self, input_channels, output_channels, shape=3, stride=1):
+    def __init__(self, input_channels, output_channels, shape=3, stride=2):
         super().__init__()
         # 畳み込み
-        self.conv_1 = nn.Conv2d(input_channels, output_channels, shape, stride=stride, padding='same')
+        self.conv_1 = nn.Conv2d(input_channels, output_channels, shape, stride=stride, padding=shape//2)
         self.bn_1 = nn.BatchNorm2d(output_channels)
-        self.conv_2 = nn.Conv2d(output_channels, output_channels, shape, padding='same')
+        self.conv_2 = nn.Conv2d(output_channels, output_channels, shape, padding=shape//2)
         self.bn_2 = nn.BatchNorm2d(output_channels)
 
 
         # Residual connection 
         self.diff = False
         if (stride != 1) or (input_channels != output_channels):
-            self.conv_3 = nn.Conv2d(input_channels, output_channels, shape, stride=stride, padding='same')
+            self.conv_3 = nn.Conv2d(input_channels, output_channels, shape, stride=stride, padding=shape//2)
             self.bn_3 = nn.BatchNorm2d(output_channels)
             self.diff = True
         self.relu = nn.ReLU()
