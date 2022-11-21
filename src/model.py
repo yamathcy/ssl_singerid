@@ -180,7 +180,6 @@ class SimpleCNNModel(pl.LightningModule):
         # self.log('test_accuracy', self.confusion(out, y), on_epoch=False, on_step=False)
 
 
-
 class ResNet(pl.LightningModule):
     def __init__(self, num_channels=32,
                  sample_rate=44100,
