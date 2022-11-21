@@ -14,7 +14,7 @@ from src.eval import *
 from src.dataio import *
 from src.preprocess import *
 from src.utils import *
-from src.config_schema import Config
+from src.config_schema import Config, log_params_from_omegaconf_dict
 
 
 """
@@ -33,6 +33,7 @@ def main(conf: Config):
         os.makedirs(dir)
     mlflow.set_tracking_uri(dir)
     tracking_uri = mlflow.get_tracking_uri()
+    log_params_from_omegaconf_dict(conf)
 
     mlflow.set_experiment(conf.experiment_name)
 
