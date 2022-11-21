@@ -104,6 +104,11 @@ def main(conf: Config):
     # 評価
     evaluation(model, trainer, test_loader)
 
+    # パラメータのロギング
+    mlf_logger.log_metrics('train')
+    mlf_logger.log_metrics('valid')
+    mlf_logger.log_metrics('test')
+
     # モデルの保存
     mlf_logger.experiment.log_artifact(mlf_logger.run_id, out_model_fn)
 
