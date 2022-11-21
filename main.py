@@ -33,7 +33,6 @@ def main(conf: Config):
         os.makedirs(dir)
     mlflow.set_tracking_uri(dir)
     tracking_uri = mlflow.get_tracking_uri()
-    log_params_from_omegaconf_dict(conf)
 
     mlflow.set_experiment(conf.experiment_name)
 
@@ -105,6 +104,8 @@ def main(conf: Config):
     # 評価
     evaluation(model, trainer, test_loader)
 
+    # パラメータのロギング
+    mlflow.log_params(conf)
     # モデルの保存
     mlf_logger.experiment.log_artifact(mlf_logger.run_id, out_model_fn)
 
