@@ -52,12 +52,12 @@ class ConvBlock(nn.Module):
         return out
 
 class Res_2d(nn.Module):
-    def __init__(self, input_channels, output_channels, shape=3, stride=2):
+    def __init__(self, input_channels, output_channels, shape=3, stride=1):
         super().__init__()
         # 畳み込み
         self.conv_1 = nn.Conv2d(input_channels, output_channels, shape, stride=stride, padding='same')
         self.bn_1 = nn.BatchNorm2d(output_channels)
-        self.conv_2 = nn.Conv2d(output_channels, output_channels, shape, padding=shape//2)
+        self.conv_2 = nn.Conv2d(output_channels, output_channels, shape, padding='same')
         self.bn_2 = nn.BatchNorm2d(output_channels)
 
 
