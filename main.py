@@ -7,26 +7,31 @@ import hydra
 from hydra.core.config_store import ConfigStore
 import mlflow
 import omegaconf
-from pytorch_lightning.loggers import MLFlowLogger
+from pytorch_lightning.loggers import WandbLogger
 from src.train import *
 from src.model import *
 from src.eval import *
 from src.dataio import *
 from src.preprocess import *
 from src.utils import *
-from src.config_schema import Config, log_params_from_omegaconf_dict
 
+import wandb
 
 """
 main.py
 メインの根幹部分．ここにロジックをまとめる．
 """
-cs = ConfigStore.instance()
-cs.store(name="config", node=Config)
+
+'''+++'''
+
 #torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
+'''+++'''
 @hydra.main(config_name="config")
-def main(conf: Config):
+def main(conf:omegaconf.DictConfig):
+    # パラメータのロギング
+    logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
+    logger.log_hyperparams(conf)
 
     # ランダムのシードを決定
     SEED = 42
@@ -36,12 +41,18 @@ def main(conf: Config):
     pl.seed_everything(SEED)
     np.random.seed(SEED)
 
+    '''+++'''
     # トラッキングを行う場所をチェックし，ログを収納するディレクトリを指定
     print(hydra.utils.get_original_cwd())
     dir = hydra.utils.get_original_cwd() + "/mlruns"
     if not os.path.exists(dir):
         os.makedirs(dir)
 
+    '''+++'''
+
+    # wandbの準備
+    wandb.init(config=conf)
+    
     # mlflowの準備
     mlflow.set_tracking_uri(dir)
     tracking_uri = mlflow.get_tracking_uri()
@@ -49,7 +60,7 @@ def main(conf: Config):
 
     # GPUの準備
     use_cuda = torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
+    Device = torch.device("cuda" if use_cuda else "cpu")
 
     # 学習したモデルのパラメータ
     out_model_fn = './model/%s' % (conf.savename)
@@ -57,20 +68,18 @@ def main(conf: Config):
         os.makedirs(out_model_fn)
 
     # データセットの読み込み
-    data_path = 'data/ESC-50-master'
+    data_path = conf.data_path
     meta_path = os.path.join(hydra.utils.get_original_cwd(), data_path,'meta/esc50.csv')
     df = pd.read_csv(meta_path)
 
-    # ラベルをsplit
-    train_label= df[df['fold']<=3]
-    valid_label = df[df['fold']==4]
-    test_label = df[df['fold']==5]
-
     # 音ファイルの読み込み
     audio_path = os.path.join(hydra.utils.get_original_cwd(), data_path, "audio")
-    train_data = ESC50(label_df=train_label, base=audio_path)
-    valid_data = ESC50(label_df=valid_label, base=audio_path)
-    test_data = ESC50(label_df=test_label, base=audio_path)
+    train_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[1,2,3,4])
+    valid_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[5])
+    test_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[6])
+
+    # classidを得る
+    target_class = train_data.get_class_to_id()
 
     # 各データローダーの用意
     train_loader = DataLoader(train_data, batch_size=conf.batch_size, shuffle=True)
@@ -79,24 +88,28 @@ def main(conf: Config):
 
     # モデル
     # パラメータによって条件を分岐
-    if conf.model == "cnn":
-        model = SimpleCNNModel()
-    elif conf.model == "resnet":
-        model = ResNet()
+    if conf.model == "crnn":
+        model = AudioDNN(conf, num_classes=20)
+    elif conf.model == "ssl":
+        model = SSLNet(conf,weights=None,url=conf.url,class_num=20)
     else:
         raise NotImplementedError
+    # Magic
+    wandb.watch(model, log_freq=100) 
 
+    '''+++'''
     # 学習
-    mlf_logger = MLFlowLogger(experiment_name=conf.experiment_name, tracking_uri=tracking_uri)
-    model, trainer = train(model, train_loader, valid_loader, max_epochs=conf.epoch, logger=mlf_logger)
+    logger.watch(model, log="all")
+    model, trainer = train(model, train_loader, valid_loader, test_loader, max_epochs=conf.epoch, logger=logger)
 
     # 評価
-    evaluation(model, trainer, test_loader)
+    evaluation(model, logger, test_loader, target_class)
 
-    # パラメータのロギング
-    mlf_logger.log_hyperparams(conf)
+    '''+++'''
+
     # モデルの保存
-    mlf_logger.experiment.log_artifact(mlf_logger.run_id, out_model_fn)
+
+
 
 if __name__ == "__main__":
     main()

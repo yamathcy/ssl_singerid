@@ -1,9 +1,7 @@
-import os,sys
-from sklearn.manifold import TSNE
-import torch 
+
 import numpy as np
-import matplotlib.pylab as plt
-from torch.utils.data import DataLoader, Dataset
+
+import librosa
 
 """
 utils.py 
@@ -18,3 +16,18 @@ def label_to_id(label:str, id_dict:dict):
         id_dict[label] = id
 
     return id_dict[label], id_dict
+
+
+def rms_filter(wav:np.ndarray, th=0.005):
+    rms = librosa.feature.rms(y=wav).squeeze()
+    return rms.mean() > th
+
+
+def chunk_audio(audio:np.ndarray, chunk_length:int, sr, rms_filter=False):
+    # Calculate number of samples per chunk	
+    samples_per_chunk = int(chunk_length * sr)
+    # Chunk the audio
+    audio_chunks = [audio[...,i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
+    if rms_filter:
+        audio_chunks = [item for item in audio_chunks if rms_filter(item)]
+    return audio_chunks

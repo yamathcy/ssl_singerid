@@ -1,5 +1,9 @@
-experiment_name: 'ESC-50 audio classification'
-model: 'cnn'
-epoch: 100
-batch_size: 16
+experiment_name: 'sid'
+data_path: "/home/ubuntu/datasets/artist20"
+model: 'crnn'
+epoch: 50
+batch_size: 32
+length: 5
 savename: 'exp.pt'
+lr: 3e-4
+url: "microsoft/wavlm-base-plus"

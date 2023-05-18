@@ -9,4 +9,12 @@ torchmetrics
 torchsummary
 torchvision
 tqdm
-
+wandb
+seaborn
+nnaudio
+transformers
+omegaconf
+numpy
+pandas
+matplotlib
+umap-learn

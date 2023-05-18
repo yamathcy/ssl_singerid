@@ -4,11 +4,78 @@ from torch.nn import functional as F
 import pytorch_lightning as pl
 import torchaudio
 import torchmetrics
+from transformers import AutoModel
+import numpy as np
 
 """
 model.py 
 学習に用いるモデルについてを書く
 """
+
+class CRNN(nn.Module):
+    """
+    Baseline model 
+    borrowed from 
+    https://github.com/bill317996/Singer-identification-in-artist20/blob/master
+    """
+    def __init__(self, sr, classes_num):
+        super().__init__()
+        self.elu = nn.ELU()
+        self.softmax = nn.Softmax(dim=1)
+
+        self.audio = torchaudio.transforms.MelSpectrogram(sample_rate=sr,
+                                                          n_mels=128,
+                                                        n_fft=2048,
+                                                        hop_length=512)
+        self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB(top_db=80)
+        
+        self.Bn0 = nn.BatchNorm1d(128)
+
+        self.Conv1 = nn.Conv2d(1, 64, (3,3))
+        self.Bn1 = nn.BatchNorm2d(64)
+        self.mp1 = nn.MaxPool2d((2,2), stride=(2,2))
+        self.drop1 = nn.Dropout2d(p=0.1)
+
+        self.Conv2 = nn.Conv2d(64, 128, (3,3))
+        self.Bn2 = nn.BatchNorm2d(128)
+        self.mp2 = nn.MaxPool2d((4,2), stride=(4,2))
+        self.drop2 = nn.Dropout2d(p=0.1)
+
+        self.Conv3 = nn.Conv2d(128, 128, (3,3))
+        self.Bn3 = nn.BatchNorm2d(128)
+        self.mp3 = nn.MaxPool2d((4,2), stride=(4,2))
+        self.drop3 = nn.Dropout2d(p=0.1)
+
+        self.Conv4 = nn.Conv2d(128, 128, (3,3))
+        self.Bn4 = nn.BatchNorm2d(128)
+        self.mp4 = nn.MaxPool2d((4,2), stride=(4,2))
+        self.drop4 = nn.Dropout2d(p=0.1)
+
+        self.gru1 = nn.GRU(128, 32, num_layers=1, batch_first=True)
+        self.gru2 = nn.GRU(32, 32, num_layers=1, batch_first=True)
+        self.drop5 = nn.Dropout(p=0.3)
+
+        self.linear1 = nn.Linear(224, classes_num)
+
+    def forward(self, x):
+        x = self.audio(x)
+        x = self.amplitude_to_db(x)
+        x = self.Bn0(x)
+        x = x[:, None, :, :]
+        x = self.drop1(self.mp1(self.Bn1(self.elu(self.Conv1(x)))))
+        x = self.drop2(self.mp2(self.Bn2(self.elu(self.Conv2(x)))))
+        x = self.drop3(self.mp3(self.Bn3(self.elu(self.Conv3(x)))))
+        x = self.drop4(self.mp4(self.Bn4(self.elu(self.Conv4(x)))))
+        x = x.transpose(1, 3)
+        x = torch.reshape(x, (x.size(0),x.size(1),-1))
+        x, _ = self.gru1(x)
+        x, _ = self.gru2(x)
+        x = self.drop5(x)
+        x = torch.reshape(x, (x.size(0), -1))
+        emb = x
+        x = self.linear1(x)
+        return x, emb
+
 
 # 畳みこみブロックの定義
 class ConvBlock(nn.Module):
@@ -283,3 +350,164 @@ class ResNet(pl.LightningModule):
         self.log('test_f1', self.test_f1(out, y), on_epoch=True, on_step=False)
         self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
         # self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
+
+
+# 7層のResnetモデル
+class AudioDNN(pl.LightningModule):
+    def __init__(self, conf, num_classes):
+        super().__init__()
+        self.lr=conf.lr
+        self.num_classes = num_classes
+        self.model = CRNN(conf.sr, num_classes)
+
+        # 評価メトリクス
+        self.train_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
+        self.val_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
+        self.test_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
+        self.test_top2 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=2)
+        self.test_top3 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=3)
+        self.test_f1 = torchmetrics.F1(num_classes=self.num_classes, average='macro')
+        self.confusion = torchmetrics.MulticlassConfusionMatrix(num_classes=self.num_classes)
+
+    def forward(self, x):
+        out, feature = self.model(x)
+        return out, feature
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
+
+    def training_step(self, train_batch, batch_idx):
+        x, y = train_batch
+        out,_ = self(x)
+        loss = F.cross_entropy(out, y)
+        self.log('train_loss', loss, on_epoch=True, on_step=False)
+        self.log('train_acc', self.train_acc(out, y), on_step=False, on_epoch=True)
+        return loss
+
+    def validation_step(self, val_batch, batch_idx):
+        x, y = val_batch
+        out,_ = self(x)
+        loss = F.cross_entropy(out, y)
+        self.log('val_loss', loss, on_epoch=True, on_step=False)
+        self.log('val_acc', self.val_acc(out, y), on_step=False, on_epoch=True)
+        return loss
+
+    # 評価をここに書く
+    def test_step(self, test_batch, batch_idx):
+        x, y = test_batch
+        out,_ = self(x)
+        self.log('test_accuracy', self.test_acc(out,y), on_epoch=True, on_step=False)
+        self.log('test_f1', self.test_f1(out, y), on_epoch=True, on_step=False)
+        self.log('test_top2_accuracy', self.test_top2(out, y), on_epoch=True, on_step=False)
+        self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
+        self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
+
+
+class Backend(nn.Module):
+    def __init__(self, class_size, encoder_size=12) -> None:
+        super().__init__()
+        assert encoder_size == 12 or encoder_size == 24
+        if encoder_size == 12:
+            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(13), requires_grad=True)
+            feature_dim=768
+        elif encoder_size == 24:
+            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(25), requires_grad=True)
+            feature_dim=1024
+        self.proj  = nn.Linear(feature_dim, feature_dim)
+        self.dropout = nn.Dropout(0.5)
+        self.classifier=nn.Linear(feature_dim, class_size)
+        
+    def forward(self,x):
+        weights = torch.sigmoid(self.layer_weights)
+        # embeddings = embeddings.transpose(1,3)  # (B, Emb, Time, Ch) * (Ch, 1)
+        x = torch.matmul(x, weights)
+        x = self.proj(x)
+        x = x.mean(1, False)
+        feature = x
+        x = self.dropout(x)
+        x = self.classifier(x)
+        return x, feature
+    
+
+class SSLNet(pl.LightningModule):
+    def __init__(self,
+                 param,
+                 weights:dict or list=None,
+                 url="microsoft/wavlm-base-plus",
+                 class_num=10,
+                 freeze_all=False
+                 ):
+        super().__init__()
+        encode_size = 24 if "large" in url else 12
+        # if param.sr != 16000:
+        #     self.resampler = torchaudio.transforms.Resample(orig_freq=param.sr, new_freq=16000)
+        # else:
+        #     self.resampler = nn.Identity()
+        self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True)
+        
+        if freeze_all:
+            for p in self.frontend.parameters():
+                p.requires_grad = False
+        else:
+            self.frontend.feature_extractor._freeze_parameters()
+        self.backend = Backend(class_num, encoder_size=encode_size)
+
+        self.train_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
+        self.val_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
+        self.test_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
+        self.test_top2 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=2)
+        self.test_top3 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=3)
+        self.test_f1 = torchmetrics.F1(num_classes=self.num_classes, average='macro')
+        self.confusion = torchmetrics.MulticlassConfusionMatrix(num_classes=self.num_classes)
+        class_weights = [float(x) for x in weights.values()]
+        self.class_weights = torch.from_numpy(np.array(class_weights)).float()
+
+
+    def forward(self, x):
+        x = x.squeeze(dim=1)
+        # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
+        x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
+        h = x["hidden_states"]
+        h = torch.stack(h, dim=3)
+        pad_width = (0, 0, 0, 0, 0, 1)
+        h = F.pad(h, pad_width, mode='reflect')
+        # print(h.shape)
+        out, feature = self.backend(h)
+        return out, feature
+
+    def configure_optimizers(self, lr=1e-3):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
+    
+    def get_layer_weight(self):
+        lw = torch.sigmoid(self.backend.layer_weights)
+        lw.detach().cpu()
+        return lw
+    
+    def training_step(self, train_batch, batch_idx):
+        x, y = train_batch
+        out,_ = self(x)
+        loss = F.cross_entropy(out, y)
+        self.log('train_loss', loss, on_epoch=True, on_step=False)
+        self.log('train_acc', self.train_acc(out, y), on_step=False, on_epoch=True)
+        return loss
+
+    def validation_step(self, val_batch, batch_idx):
+        x, y = val_batch
+        out,_ = self(x)
+        loss = F.cross_entropy(out, y)
+        self.log('val_loss', loss, on_epoch=True, on_step=False)
+        self.log('val_acc', self.val_acc(out, y), on_step=False, on_epoch=True)
+        return loss
+
+    def test_step(self, test_batch, batch_idx):
+        x, y = test_batch
+        out,_ = self(x)
+        self.log('test_accuracy', self.test_acc(out,y), on_epoch=True, on_step=False)
+        self.log('test_f1', self.test_f1(out, y), on_epoch=True, on_step=False)
+        self.log('test_top2_accuracy', self.test_top2(out, y), on_epoch=True, on_step=False)
+        self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
+        self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
+
+
