@@ -8,6 +8,6 @@ train.py
 """
 
 def train(model, train_loader, valid_loader, logger, max_epochs=100):
-    trainer = pl.Trainer(gpus=1, max_epochs=max_epochs, deterministic=True, check_val_every_n_epoch=10, logger=logger)
+    trainer = pl.Trainer(max_epochs=max_epochs, deterministic=True, check_val_every_n_epoch=10, logger=logger)
     trainer.fit(model, train_loader, valid_loader)
     return model, trainer
