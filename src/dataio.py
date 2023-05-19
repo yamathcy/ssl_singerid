@@ -6,7 +6,7 @@ from tqdm import tqdm
 import glob
 from pathlib import Path
 from src.utils import chunk_audio
-
+import torchaudio
 """
 dataio.py
 ファイルの入出力に関する処理を書く
@@ -47,12 +47,12 @@ class Artist(torch.utils.data.Dataset):
                     for file_path in audio_list:
                         # データ，ラベルの読み込み
                         audio, sr = librosa.load(file_path, sr=self.sr)
-                        audio = audio[np.newaxis,...]
+                        audio, sr = torchaudio.load(file_path)
 
                         # チャンク（無音だけのファイルを除去）してデータにappend
                         trimmed = chunk_audio(audio,chunk_length,sr,rms_filter=True)
                         for chunk in trimmed:
-                            chunk = torch.from_numpy(chunk)
+                            # chunk = torch.from_numpy(chunk)
                             self.data.append(chunk)
                             self.labels.append(singer_label)
                             del chunk
