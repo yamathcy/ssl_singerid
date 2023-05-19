@@ -30,7 +30,7 @@ main.py
 @hydra.main(config_name="config")
 def main(conf:omegaconf.DictConfig):
     torch.set_float32_matmul_precision('high')
-    
+
     # パラメータのロギング
     # wandbの準備
     # wandb.init(config=conf)
@@ -100,7 +100,12 @@ def main(conf:omegaconf.DictConfig):
     else:
         raise NotImplementedError
     # Magic
-    wandb.watch(model, log_freq=100) 
+    wandb.watch(model, log_freq=100)
+
+    # test
+    test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length))).cuda()
+    model = model.cuda()
+    out,_ = model(test_input)
 
     '''+++'''
     # 学習
