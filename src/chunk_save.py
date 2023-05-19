@@ -38,8 +38,12 @@ def main(args):
                 trimmed = chunk_audio(audio, args.chunk_length, sr, rms_filter=True)
                 label_for_trimmed = [singer_label for x in range(len(trimmed))]
                 for id,  (chunk, lab) in enumerate(zip(trimmed,label_for_trimmed)):
-                    save_path = os.path.join(args.save_dir, "{}-{}-{}-{}.pt".format(lab, num, song, id))
-                    torch.save(chunk,save_path)
+                    try:
+                        save_path = os.path.join(args.save_dir, "{}-{}-{}-{}.pt".format(lab, num, song, id))
+                        if not os.path.exists(save_path):
+                            torch.save(chunk,save_path)
+                    except:
+                        pass
 
 def derive_desired_wav(audio, old_fs, new_fs):
     if old_fs != new_fs:
@@ -89,7 +93,7 @@ def chunk_audio(audio:torch.Tensor, chunk_length:int, sr, rms_filter=False):
 if  __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", type=str, default="/home/ubuntu/dataset/artist20", help="The path to the dataset")
-    parser.add_argument("--save_dir", type=str, default="/home/ubuntu/dataset/artist20/_chunked", help="The path to the dataset")
+    parser.add_argument("--save_dir", type=str, default="/home/ubuntu/dataset/artist20/chunked", help="The path to the dataset")
     parser.add_argument("--chunk_length", type=int, default=5, help="The length of chunk in seconds")
 
     args = parser.parse_args()
