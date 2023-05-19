@@ -68,7 +68,7 @@ def torch_rms(y,
     rms = torch.sqrt(power.squeeze())
     return rms
 
-def rms_filtering(wav:np.ndarray, th=0.01):
+def rms_filtering(wav, th=0.01):
     rms = torch_rms(wav)
     return torch.mean(rms) > th
 
