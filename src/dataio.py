@@ -106,6 +106,7 @@ def chunk_audio(audio:torch.Tensor, chunk_length:int, sr, rms_filter=False):
     audio =torch.squeeze(audio)
     audio_chunks = [audio[i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
     print("{} chunks".format(len(audio_chunks)))
+    print(audio_chunks[-1].shape)
     if rms_filter:
         audio_chunks = [torch.unsqueeze(item,dim=0) for item in audio_chunks if rms_filtering(item)]
     print("{}  trimed chunks".format(len(audio_chunks)))
