@@ -77,6 +77,7 @@ def main(conf:omegaconf.DictConfig):
     train_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[1,2,3,4])
     valid_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[5])
     test_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[6])
+    print("chunked audio: train: {}, valid: {}, test: {}".format(len(train_data), len(valid_data), len(test_data)))
 
     # classidを得る
     target_class = train_data.get_class_to_id()
