@@ -30,13 +30,13 @@ class Artist(torch.utils.data.Dataset):
             self.id_to_class[i] = category
 
         # データとラベルの読み込み
-        for singer in self.singers:
+        for singer in tqdm(self.singers):
             print("load singer: {}".format(singer))
             singer_path = os.path.join(dir, singer)
             p = Path(singer_path)
             albums = [entry.name for entry in p.iterdir() if entry.is_dir()]
             singer_label = self.class_to_id[singer]
-            for num, album in tqdm(enumerate(albums)):
+            for num, album in enumerate(albums):
                 if num not in set:
                     # アルバムスプリット，目的のセットでないならパス
                     continue
@@ -105,9 +105,10 @@ def chunk_audio(audio:torch.Tensor, chunk_length:int, sr, rms_filter=False):
     # Chunk the audio
     audio =torch.squeeze(audio)
     audio_chunks = [audio[i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
-    print("{} chunks".format(len(audio_chunks)))
-    print(audio_chunks[-1].shape)
+    # print("{} chunks".format(len(audio_chunks)))
+    audio_chunks.pop(-1)
+    # print(audio_chunks[-1].shape)
     if rms_filter:
         audio_chunks = [torch.unsqueeze(item,dim=0) for item in audio_chunks if rms_filtering(item)]
-    print("{}  trimed chunks".format(len(audio_chunks)))
+    # print("{}  trimed chunks".format(len(audio_chunks)))
     return audio_chunks
