@@ -42,12 +42,12 @@ class CRNN(nn.Module):
 
         self.Conv3 = nn.Conv2d(128, 128, (3,3))
         self.Bn3 = nn.BatchNorm2d(128)
-        self.mp3 = nn.MaxPool2d((4,2), stride=(2,4))
+        self.mp3 = nn.MaxPool2d((4,2), stride=(4,4))
         self.drop3 = nn.Dropout2d(p=0.1)
 
         self.Conv4 = nn.Conv2d(128, 128, (3,3))
         self.Bn4 = nn.BatchNorm2d(128)
-        self.mp4 = nn.MaxPool2d((4,2), stride=(2,4))
+        self.mp4 = nn.MaxPool2d((4,2), stride=(4,4))
         self.drop4 = nn.Dropout2d(p=0.1)
 
         self.gru1 = nn.GRU(128, 32, num_layers=1, batch_first=True)
