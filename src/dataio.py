@@ -73,15 +73,18 @@ class Artist(torch.utils.data.Dataset):
         self.sr = sr
         self.data = []
         self.labels = []
+        # クラス名とIDを相互参照するためのdict
+        self.class_to_id = {}
+        self.id_to_class = {}
 
         for fold in set:
             self.data.extend(sorted(glob.glob(os.path.join(dir, "*_{}_*.pt".format(fold)))))
         for data in self.data:
-            self.labels.append(int(os.path.basename(data.split("_")[0])))
-
-        # クラス名とIDを相互参照するためのdict
-        self.class_to_id = {}
-        self.id_to_class = {}
+            singer = os.path.basename(data.split("-")[0])
+            if not singer in self.class_to_id:
+                self.class_to_id[singer] = len(self.class_to_id)
+                self.id_to_class[len(self.class_to_id)] = singer
+            self.labels.append(self.class_to_id[singer])
 
         for i, category in enumerate():
             self.class_to_id[category] = i
@@ -91,7 +94,9 @@ class Artist(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx], self.labels[idx]
+        data = torch.load(self.data[idx])
+        label = self.labels[idx]
+        return data,label
 
     def get_class_to_id(self):
         return self.class_to_id

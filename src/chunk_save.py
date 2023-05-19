@@ -28,7 +28,7 @@ def main(args):
         singer_label = singer
         for num, album in enumerate(albums):
             audio_list = sorted(glob.glob(os.path.join(args.dir, singer, album, "*vocal.wav")))
-            for file_path in audio_list:
+            for song, file_path in enumerate(audio_list):
                 # データ，ラベルの読み込み
                 # audio, sr = librosa.load(file_path, sr=sr)
                 audio, sr = torchaudio.load(file_path)
@@ -38,7 +38,7 @@ def main(args):
                 trimmed = chunk_audio(audio, args.chunk_length, sr, rms_filter=True)
                 label_for_trimmed = [singer_label for x in range(len(trimmed))]
                 for id,  (chunk, lab) in enumerate(zip(trimmed,label_for_trimmed)):
-                    save_path = os.path.join(args.save_dir, "{}-{}-{}.pt".format(lab, num, id))
+                    save_path = os.path.join(args.save_dir, "{}-{}-{}-{}.pt".format(lab, num, song, id))
                     torch.save(chunk,save_path)
 
 def derive_desired_wav(audio, old_fs, new_fs):
