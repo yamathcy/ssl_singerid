@@ -31,6 +31,7 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
         sig = sig.to("cuda")
 
         la = int(la)
+        model = model.to("cuda")
         _ , feature = model(sig)
         feature = feature.detach().cpu().numpy().copy()
         out = model.predict(sig)
