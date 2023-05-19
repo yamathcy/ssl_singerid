@@ -13,7 +13,7 @@ model.py
 学習に用いるモデルについてを書く
 """
 
-class CRNN(nn.Module):
+class CRNN(pl.LightningModule):
     """
     Baseline model 
     borrowed from 
