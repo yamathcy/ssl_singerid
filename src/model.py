@@ -3,7 +3,8 @@ from torch import nn
 from torch.nn import functional as F
 import pytorch_lightning as pl
 import torchaudio
-import torchmetrics
+# import torchmetrics
+from torchmetrics import Accuracy, F1Score, ConfusionMatrix
 from transformers import AutoModel
 import numpy as np
 
@@ -185,12 +186,12 @@ class SimpleCNNModel(pl.LightningModule):
         self.relu = nn.ReLU()
 
         # 評価メトリクス
-        self.train_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.val_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.test_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.test_top3 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=3)
-        self.test_f1 = torchmetrics.F1(num_classes=self.num_classes, average='macro')
-        # self.confusion = torchmetrics.ConfusionMatrix(num_classes=self.num_classes)
+        self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.val_acc = Accuracy(num_classes=self.num_classes, average='macro' ,task='multiclass')
+        self.test_acc = Accuracy(num_classes=self.num_classes, average='macro' ,task='multiclass')
+        self.test_top3 = Accuracy(num_classes=self.num_classes, average='macro', top_k=3 ,task='multiclass')
+        self.test_f1 = F1Score(num_classes=self.num_classes, average='macro' ,task='multiclass')
+        self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
 
     def forward(self, x):
         # 入力のスペクトログラム
@@ -289,11 +290,13 @@ class ResNet(pl.LightningModule):
         self.relu = nn.ReLU()
 
         # 評価メトリクス
-        self.train_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.val_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.test_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.test_top3 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=3)
-        self.test_f1 = torchmetrics.F1(num_classes=self.num_classes, average='macro')
+        self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.val_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.test_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.test_top2 = Accuracy(num_classes=self.num_classes, average='macro', top_k=2, task='multiclass')
+        self.test_top3 = Accuracy(num_classes=self.num_classes, average='macro', top_k=3, task='multiclass')
+        self.test_f1 = F1Score(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
         # self.confusion = torchmetrics.ConfusionMatrix(num_classes=self.num_classes)
 
     def forward(self, x):
@@ -361,13 +364,13 @@ class AudioDNN(pl.LightningModule):
         self.model = CRNN(conf.sr, num_classes)
 
         # 評価メトリクス
-        self.train_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.val_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.test_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.test_top2 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=2)
-        self.test_top3 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=3)
-        self.test_f1 = torchmetrics.F1(num_classes=self.num_classes, average='macro')
-        self.confusion = torchmetrics.MulticlassConfusionMatrix(num_classes=self.num_classes)
+        self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.val_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.test_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.test_top2 = Accuracy(num_classes=self.num_classes, average='macro', top_k=2, task='multiclass')
+        self.test_top3 = Accuracy(num_classes=self.num_classes, average='macro', top_k=3, task='multiclass')
+        self.test_f1 = F1Score(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
 
     def forward(self, x):
         out, feature = self.model(x)
@@ -453,13 +456,13 @@ class SSLNet(pl.LightningModule):
             self.frontend.feature_extractor._freeze_parameters()
         self.backend = Backend(class_num, encoder_size=encode_size)
 
-        self.train_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.val_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.test_acc = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro')
-        self.test_top2 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=2)
-        self.test_top3 = torchmetrics.Accuracy(num_classes=self.num_classes, average='macro', top_k=3)
-        self.test_f1 = torchmetrics.F1(num_classes=self.num_classes, average='macro')
-        self.confusion = torchmetrics.MulticlassConfusionMatrix(num_classes=self.num_classes)
+        self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.val_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.test_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.test_top2 = Accuracy(num_classes=self.num_classes, average='macro', top_k=2, task='multiclass')
+        self.test_top3 = Accuracy(num_classes=self.num_classes, average='macro', top_k=3, task='multiclass')
+        self.test_f1 = F1Score(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
         class_weights = [float(x) for x in weights.values()]
         self.class_weights = torch.from_numpy(np.array(class_weights)).float()
 
