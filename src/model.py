@@ -54,28 +54,28 @@ class CRNN(nn.Module):
         self.gru2 = nn.GRU(32, 32, num_layers=1, batch_first=True)
         self.drop5 = nn.Dropout(p=0.3)
 
-        self.linear1 = nn.Linear(224, classes_num)
+        self.linear1 = nn.Linear(32, classes_num)
 
     def forward(self, x):
         x = self.audio(x)
         x = self.amplitude_to_db(x)
         # x = torch.permute(x, (0,1,3,2))
-        print(x.shape)
+
         x = self.drop1(self.mp1(self.Bn1(self.elu(self.Conv1(x)))))
-        print(x.shape)
+
         x = self.drop2(self.mp2(self.Bn2(self.elu(self.Conv2(x)))))
-        print(x.shape)
+
         x = self.drop3(self.mp3(self.Bn3(self.elu(self.Conv3(x)))))
-        print(x.shape)
+
         x = self.drop4(self.mp4(self.Bn4(self.elu(self.Conv4(x)))))
-        print(x.shape)
+
         x = x.transpose(1, 3)
         x = torch.reshape(x, (x.size(0),x.size(1),-1))
-        print(x.shape)
+
         x, _ = self.gru1(x)
         x, _ = self.gru2(x)
         x = self.drop5(x)
-        print(x.shape)
+
         x = torch.reshape(x, (x.size(0), -1))
         emb = x
         x = self.linear1(x)
