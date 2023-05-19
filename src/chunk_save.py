@@ -36,7 +36,7 @@ def main(args):
                 audio = torch.FloatTensor(audio)
                 # print(audio.shape)
                 # チャンク（無音だけのファイルを除去）してデータにappend
-                trimmed = chunk_audio(audio, args.chunk_length, sr, rms_filter=True)
+                trimmed = chunk_audio(audio, args.chunk_length, fs, rms_filter=True)
                 label_for_trimmed = [singer_label for x in range(len(trimmed))]
                 for id,  (chunk, lab) in enumerate(zip(trimmed,label_for_trimmed)):
                     try:
