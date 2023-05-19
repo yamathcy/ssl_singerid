@@ -5,7 +5,7 @@ import torch
 import requests
 import hydra
 from hydra.core.config_store import ConfigStore
-import torch.utils.data import DataLoader
+from torch.utils.data import DataLoader
 import omegaconf
 from pytorch_lightning.loggers import WandbLogger
 from src.train import *
