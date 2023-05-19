@@ -19,12 +19,13 @@ class CRNN(pl.LightningModule):
     borrowed from 
     https://github.com/bill317996/Singer-identification-in-artist20/blob/master
     """
-    def __init__(self, sr, classes_num):
+    def __init__(self, conf, classes_num):
         super().__init__()
+        self.lr = conf.lr
         self.elu = nn.ELU()
         self.softmax = nn.Softmax(dim=1)
 
-        self.audio = torchaudio.transforms.MelSpectrogram(sample_rate=sr,
+        self.audio = torchaudio.transforms.MelSpectrogram(sample_rate=conf.sr,
                                                           n_mels=128,
                                                         n_fft=2048,
                                                         hop_length=512)
@@ -56,6 +57,14 @@ class CRNN(pl.LightningModule):
 
         self.linear1 = nn.Linear(32, classes_num)
 
+        self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.val_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.test_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.test_top2 = Accuracy(num_classes=self.num_classes, average='macro', top_k=2, task='multiclass')
+        self.test_top3 = Accuracy(num_classes=self.num_classes, average='macro', top_k=3, task='multiclass')
+        self.test_f1 = F1Score(num_classes=self.num_classes, average='macro', task='multiclass')
+        self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
+
     def forward(self, x):
         x = self.audio(x)
         x = self.amplitude_to_db(x)
@@ -80,6 +89,34 @@ class CRNN(pl.LightningModule):
         emb = x
         x = self.linear1(x)
         return x, emb
+    def training_step(self, train_batch, batch_idx):
+        x, y = train_batch
+        out,_ = self(x)
+        loss = F.cross_entropy(out, y)
+        self.log('train_loss', loss, on_epoch=True, on_step=False)
+        self.log('train_acc', self.train_acc(out, y), on_step=False, on_epoch=True)
+        return loss
+    def validation_step(self, val_batch, batch_idx):
+        x, y = val_batch
+        out,_ = self(x)
+        loss = F.cross_entropy(out, y)
+        self.log('val_loss', loss, on_epoch=True, on_step=False)
+        self.log('val_acc', self.val_acc(out, y), on_step=False, on_epoch=True)
+        return loss
+
+    def test_step(self, test_batch, batch_idx):
+        x, y = test_batch
+        out,_ = self(x)
+        self.log('test_accuracy', self.test_acc(out,y), on_epoch=True, on_step=False)
+        self.log('test_f1', self.test_f1(out, y), on_epoch=True, on_step=False)
+        self.log('test_top2_accuracy', self.test_top2(out, y), on_epoch=True, on_step=False)
+        self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
+        self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
+
 
 
 # 畳みこみブロックの定義
@@ -439,13 +476,14 @@ class Backend(nn.Module):
 
 class SSLNet(pl.LightningModule):
     def __init__(self,
-                 param,
+                 conf,
                  weights:dict or list=None,
                  url="microsoft/wavlm-base-plus",
                  class_num=10,
                  freeze_all=False
                  ):
         super().__init__()
+        self.lr = conf.lr
         encode_size = 24 if "large" in url else 12
         # if param.sr != 16000:
         #     self.resampler = torchaudio.transforms.Resample(orig_freq=param.sr, new_freq=16000)

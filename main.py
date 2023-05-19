@@ -90,7 +90,7 @@ def main(conf:omegaconf.DictConfig):
     # モデル
     # パラメータによって条件を分岐
     if conf.model == "crnn":
-        model = CRNN(conf.sr, classes_num=20)
+        model = CRNN(conf, classes_num=20)
     elif conf.model == "ssl":
         model = SSLNet(conf,weights=None,url=conf.url,class_num=20)
     else:
