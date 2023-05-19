@@ -32,7 +32,8 @@ def main(args):
                 # データ，ラベルの読み込み
                 # audio, sr = librosa.load(file_path, sr=sr)
                 audio, sr = torchaudio.load(file_path)
-                audio = derive_desired_wav(audio, sr, sr)
+                audio = derive_desired_wav(audio, sr, args.sr)
+                audio = torch.FloatTensor(audio)
                 # print(audio.shape)
                 # チャンク（無音だけのファイルを除去）してデータにappend
                 trimmed = chunk_audio(audio, args.chunk_length, sr, rms_filter=True)
@@ -44,6 +45,7 @@ def main(args):
                             torch.save(chunk,save_path)
                     except:
                         pass
+                del audio
 
 def derive_desired_wav(audio, old_fs, new_fs):
     if old_fs != new_fs:
