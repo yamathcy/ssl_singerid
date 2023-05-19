@@ -31,13 +31,13 @@ class Artist(torch.utils.data.Dataset):
             self.id_to_class[i] = category
 
         # データとラベルの読み込み
-        for singer in tqdm(self.singers):
+        for singer in self.singers:
             print("load singer: {}".format(singer))
             singer_path = os.path.join(dir, singer)
             p = Path(singer_path)
             albums = [entry.name for entry in p.iterdir() if entry.is_dir()]
             singer_label = self.class_to_id[singer]
-            for num, album in enumerate(albums):
+            for num, album in tqdm(enumerate(albums)):
                 if num not in set:
                     # アルバムスプリット，目的のセットでないならパス
                     continue
@@ -55,10 +55,11 @@ class Artist(torch.utils.data.Dataset):
                             chunk = torch.from_numpy(chunk)
                             self.data.append(chunk)
                             self.labels.append(singer_label)
+                            del chunk
                     # 解放
                     del audio
                     del trimmed
-                    del chunk
+
     
     def __len__(self):
         return len(self.data)
