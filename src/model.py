@@ -149,10 +149,10 @@ class Backend(nn.Module):
         assert encoder_size == 12 or encoder_size == 24
         if encoder_size == 12:
             self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(13), requires_grad=True)
-            feature_dim=768
+            feature_dim = 768
         elif encoder_size == 24:
             self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(25), requires_grad=True)
-            feature_dim=1024
+            feature_dim = 1024
         self.proj  = nn.Linear(feature_dim, feature_dim)
         self.dropout = nn.Dropout(0.5)
         self.classifier=nn.Linear(feature_dim, class_size)
