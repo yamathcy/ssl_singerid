@@ -79,7 +79,7 @@ class Artist(torch.utils.data.Dataset):
         print('data: {}'.format(dir))
 
         for fold in set:
-            self.data.extend(sorted(glob.glob(os.path.join(dir, "*_{}_*_*.npy".format(fold)))))
+            self.data.extend(sorted(glob.glob(os.path.join(dir, "*-{}-*-*.npy".format(fold)))))
         for data in self.data:
             singer = os.path.basename(data.split("-")[0])
             if not singer in self.class_to_id:
