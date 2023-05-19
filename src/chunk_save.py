@@ -38,7 +38,7 @@ def main(args):
                 trimmed = chunk_audio(audio, args.chunk_length, sr, rms_filter=True)
                 label_for_trimmed = [singer_label for x in range(len(trimmed))]
                 for id,  (chunk, lab) in enumerate(zip(trimmed,label_for_trimmed)):
-                    save_path = os.path.join(args.save_dir, "{}_{}_{}.pt".format(lab, num, id))
+                    save_path = os.path.join(args.save_dir, "{}-{}-{}.pt".format(lab, num, id))
                     torch.save(chunk,save_path)
 
 def derive_desired_wav(audio, old_fs, new_fs):
