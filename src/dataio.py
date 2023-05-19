@@ -5,7 +5,7 @@ import torch
 from tqdm import tqdm
 import glob
 from pathlib import Path
-from utils import chunk_audio
+from src.utils import chunk_audio
 
 """
 dataio.py
