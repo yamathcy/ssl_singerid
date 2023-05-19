@@ -102,16 +102,12 @@ def main(conf:omegaconf.DictConfig):
 
     '''+++'''
     # 学習
-    logger.watch(model, log="all")
     model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, max_epochs=conf.epoch, logger=logger)
 
     # 評価
     evaluation(model, logger, test_loader, target_class)
 
     '''+++'''
-
-    # モデルの保存
-
 
 
 if __name__ == "__main__":

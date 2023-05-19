@@ -68,7 +68,9 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
     print("Top-2:{:.3f}".format(top_2))
     print("Top-3:{:.3f}".format(top_3))
     print("f1-score: {:.3f}".format(macrof1))
+    plt.tight_layout()
     plt.savefig("confusion_matrix.png")
+    logger.log_image(key='confusion_matrix', images=['confusion_matrix.png'])
     with open("result.txt", 'a') as f:
         print("---Accuracy Report---", file=f)
         print("Overall accracy:{:.3f}".format(accuracy) ,file=f)
@@ -77,10 +79,10 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
         print("Top-3:{:.3f}".format(top_3),file=f)
         print("f1-score: {:.3f}".format(macrof1))
         print(report, file=f)
-    logger.use_artifact("result.txt", artifact_type='text')
+    # logger.use_artifact("result.txt", artifact_type='text')
     logger.log_metrics({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
-    logger.log_artifact("confusion_matrix.png", artifact_type='image')
-    logger.log_artifact("embedding.png", artifact_type='image')
+    # logger.use_artifact("confusion_matrix.png", artifact_type='image')
+    # logger.use_artifact("embedding.png", artifact_type='image')
     for label_name, val in zip(report.keys(), report.values()):
         try:
             logger.log_metrics({"class_f1_" + label_name:val['f1-score']})
