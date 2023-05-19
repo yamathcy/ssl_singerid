@@ -76,6 +76,7 @@ class Artist(torch.utils.data.Dataset):
         # クラス名とIDを相互参照するためのdict
         self.class_to_id = {}
         self.id_to_class = {}
+        print('data: {}'.format(dir))
 
         for fold in set:
             self.data.extend(sorted(glob.glob(os.path.join(dir, "*_{}_*_*.npy".format(fold)))))
