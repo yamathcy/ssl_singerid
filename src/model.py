@@ -92,11 +92,13 @@ class CRNN(pl.LightningModule):
         return x, emb
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
+        # print(x.shape)
         out,_ = self(x)
         loss = F.cross_entropy(out, y)
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', self.train_acc(out, y), on_step=False, on_epoch=True)
         return loss
+
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
         out,_ = self(x)
@@ -230,6 +232,7 @@ class SSLNet(pl.LightningModule):
     
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
+        print(x.shape)
         out,_ = self(x)
         loss = F.cross_entropy(out, y)
         self.log('train_loss', loss, on_epoch=True, on_step=False)
@@ -252,6 +255,7 @@ class SSLNet(pl.LightningModule):
         self.log('test_top2_accuracy', self.test_top2(out, y), on_epoch=True, on_step=False)
         self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
         self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
+
     def predict(self, x):
         self.eval()
         out, _ = self.forward(x)
