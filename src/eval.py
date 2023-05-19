@@ -22,11 +22,12 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
     :param test_loader:
     :return:
     """
+    feature_vecs = []
+    pred = []
+    pre_prob = []
+    label = []
     for sig, la, _ in test_loader:
-        feature_vecs = []
-        pred = []
-        pre_prob = []
-        label = []
+
         #print(sig.shape)
         sig = sig.cuda()
         la = int(la)
@@ -38,8 +39,7 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
         pred.append(out)
         pre_prob.append(prob)
         label.append(la)
-
-    feature_vecs.append(feature)
+        feature_vecs.append(feature)
     pred = np.array(pred)
     pre_prob = np.array(pre_prob)
     label = np.array(label)
