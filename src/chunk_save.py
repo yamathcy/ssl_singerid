@@ -4,6 +4,8 @@ import torchaudio
 from pathlib import Path
 from tqdm import tqdm
 import argparse
+import numpy as np
+
 def main(args):
     # クラス名とIDを相互参照するためのdict
     class_to_id = {}
@@ -42,7 +44,8 @@ def main(args):
                     try:
                         save_path = os.path.join(args.save_dir, "{}-{}-{}-{}.pt".format(lab, num, song, id))
                         if not os.path.exists(save_path):
-                            torch.save(chunk,save_path)
+                            chunk = chunk.detach().numpy()
+                            np.save(chunk,save_path)
                     except:
                         pass
                 del audio
