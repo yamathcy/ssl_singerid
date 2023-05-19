@@ -8,3 +8,4 @@ length: 5
 savename: 'exp.pt'
 lr: 3e-4
 url: "microsoft/wavlm-base-plus"
+fp: True

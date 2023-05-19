@@ -178,6 +178,7 @@ class SSLNet(pl.LightningModule):
                  freeze_all=False
                  ):
         super().__init__()
+
         self.num_classes = class_num
         self.lr = conf.lr
         encode_size = 24 if "large" in url else 12
@@ -203,7 +204,6 @@ class SSLNet(pl.LightningModule):
         self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
         # class_weights = [float(x) for x in weights.values()]
         # self.class_weights = torch.from_numpy(np.array(class_weights)).float()
-
 
     def forward(self, x):
         if len(x.shape) > 2:

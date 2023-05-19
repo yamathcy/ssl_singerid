@@ -102,7 +102,7 @@ def main(conf:omegaconf.DictConfig):
 
     '''+++'''
     # 学習
-    model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, max_epochs=conf.epoch, logger=logger)
+    model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, max_epochs=conf.epoch, logger=logger, fp=conf.fp)
 
     # 評価
     evaluation(model, logger, test_loader, target_class)
