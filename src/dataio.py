@@ -83,7 +83,7 @@ def derive_desired_wav(audio, old_fs, new_fs):
 def torch_rms(y,
               frame_length: int = 512,
               hop_length: int = 512,
-              pad_mode: str = " constant",
+              pad_mode: str = "reflect",
               center=True):
     if y is not None:
         tra = torchaudio.transforms.Spectrogram(n_fft=frame_length, hop_length=hop_length, pad_mode=pad_mode, center=center)
@@ -94,7 +94,7 @@ def torch_rms(y,
         rms = torch.sqrt(power.squeeze())
 
 
-def rms_filtering(wav:np.ndarray, th=0.005):
+def rms_filtering(wav:np.ndarray, th=0.01):
     rms = torch_rms(wav)
     return torch.mean(rms) > th
 
