@@ -7,6 +7,7 @@ import torchaudio
 from torchmetrics import Accuracy, F1Score, ConfusionMatrix
 from transformers import AutoModel
 import numpy as np
+from abc import abstractmethod
 
 """
 model.py 
