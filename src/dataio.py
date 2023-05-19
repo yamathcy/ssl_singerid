@@ -85,13 +85,15 @@ def torch_rms(y,
               hop_length: int = 512,
               pad_mode: str = "reflect",
               center=True):
-    if y is not None:
-        tra = torchaudio.transforms.Spectrogram(n_fft=frame_length, hop_length=hop_length, pad_mode=pad_mode, center=center)
-        spec = tra(y)
-        spec[..., 0, :] *= 0.5
-        # Calculate power
-        power = 2 * torch.sum(spec, axis=-2, keepdims=True) /frame_length
-        rms = torch.sqrt(power.squeeze())
+    tra = torchaudio.transforms.Spectrogram(n_fft=frame_length, hop_length=hop_length, pad_mode=pad_mode, center=center)
+    spec = tra(y)
+    spec[..., 0, :] *= 0.5
+    # Calculate power
+    power = 2 * torch.sum(spec, axis=-2, keepdims=True) /frame_length
+    rms = torch.sqrt(power.squeeze())
+    return rms
+
+
 
 def rms_filtering(wav:np.ndarray, th=0.01):
     rms = torch_rms(wav)
