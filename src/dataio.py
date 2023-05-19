@@ -34,15 +34,15 @@ class Artist(torch.utils.data.Dataset):
             print("load singer: {}".format(singer))
             singer_path = os.path.join(dir, singer)
             p = Path(singer_path)
-            albums = [entry.name for entry in p.iterdir() if entry.is_dir()]
+            albums = sorted([entry.name for entry in p.iterdir() if entry.is_dir()])
             singer_label = self.class_to_id[singer]
             for num, album in enumerate(albums):
                 if num not in set:
                     # アルバムスプリット，目的のセットでないならパス
+                    print("{} is not in set {}, skipped".format(num,set))
                     continue
                 else:
                     audio_list = sorted(glob.glob(os.path.join(dir, singer, album, "*vocal.wav")))
-
                     for file_path in audio_list:
                         # データ，ラベルの読み込み
                         # audio, sr = librosa.load(file_path, sr=self.sr)
