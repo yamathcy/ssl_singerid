@@ -5,7 +5,7 @@ import torch
 import requests
 import hydra
 from hydra.core.config_store import ConfigStore
-import mlflow
+import torch.utils.data import DataLoader
 import omegaconf
 from pytorch_lightning.loggers import WandbLogger
 from src.train import *
@@ -54,9 +54,9 @@ def main(conf:omegaconf.DictConfig):
     wandb.init(config=conf)
     
     # mlflowの準備
-    mlflow.set_tracking_uri(dir)
-    tracking_uri = mlflow.get_tracking_uri()
-    mlflow.set_experiment(conf.experiment_name)
+    # mlflow.set_tracking_uri(dir)
+    # tracking_uri = mlflow.get_tracking_uri()
+    # mlflow.set_experiment(conf.experiment_name)
 
     # GPUの準備
     use_cuda = torch.cuda.is_available()
@@ -69,11 +69,11 @@ def main(conf:omegaconf.DictConfig):
 
     # データセットの読み込み
     data_path = conf.data_path
-    meta_path = os.path.join(hydra.utils.get_original_cwd(), data_path,'meta/esc50.csv')
-    df = pd.read_csv(meta_path)
+    # meta_path = os.path.join(hydra.utils.get_original_cwd(), data_path,'meta/esc50.csv')
+    # df = pd.read_csv(meta_path)
 
     # 音ファイルの読み込み
-    audio_path = os.path.join(hydra.utils.get_original_cwd(), data_path, "audio")
+    audio_path = os.path.join(hydra.utils.get_original_cwd(), data_path)
     train_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[1,2,3,4])
     valid_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[5])
     test_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[6])
