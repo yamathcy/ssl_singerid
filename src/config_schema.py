@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from omegaconf import ListConfig, DictConfig
-import mlflow
 
 """
 config_schema.py
