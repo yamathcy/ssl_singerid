@@ -45,7 +45,7 @@ def main(args):
                         save_path = os.path.join(args.save_dir, "{}-{}-{}-{}.npy".format(lab, num, song, id))
                         if not os.path.exists(save_path):
                             chunk = chunk.detach().numpy()
-                            np.save(chunk,save_path)
+                            np.save(save_path, chunk)
                     except:
                         pass
                 del audio
