@@ -448,6 +448,27 @@ class AudioDNN(pl.LightningModule):
         self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
         self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
 
+    def predict(self, x):
+        self.eval()
+        out, _ = self.forward(x)
+        out = torch.argmax(out, dim=1)
+        out = out.cpu().detach().numpy().copy()
+        # out = np.squeeze(out)
+        return out
+
+    def predict_proba(self, x):
+        """
+
+        :param x: input tensor (torch.Tensor)
+        :return: single output of model (numpy.array)
+        """
+        self.eval()
+        out, _ = self.forward(x)
+        out = torch.softmax(out, dim=1)  # assuming logits has the shape [batch_size, nb_classes]
+        out = out.cpu().detach().numpy().copy()
+        out = np.squeeze(out)
+        return out
+
 
 class Backend(nn.Module):
     def __init__(self, class_size, encoder_size=12) -> None:
@@ -556,5 +577,23 @@ class SSLNet(pl.LightningModule):
         self.log('test_top2_accuracy', self.test_top2(out, y), on_epoch=True, on_step=False)
         self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
         self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
+    def predict(self, x):
+        self.eval()
+        out, _ = self.forward(x)
+        out = torch.argmax(out, dim=1)
+        out = out.cpu().detach().numpy().copy()
+        # out = np.squeeze(out)
+        return out
 
+    def predict_proba(self, x):
+        """
 
+        :param x: input tensor (torch.Tensor)
+        :return: single output of model (numpy.array)
+        """
+        self.eval()
+        out, _ = self.forward(x)
+        out = torch.softmax(out, dim=1)  # assuming logits has the shape [batch_size, nb_classes]
+        out = out.cpu().detach().numpy().copy()
+        out = np.squeeze(out)
+        return out
