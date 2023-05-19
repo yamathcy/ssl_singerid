@@ -84,11 +84,10 @@ class Artist(torch.utils.data.Dataset):
         for data in self.data:
             singer = os.path.basename(data.split("-")[0])
             if not singer in self.class_to_id.keys():
-                print(singer)
                 self.class_to_id[singer] = int(len(self.class_to_id))
                 self.id_to_class[len(self.class_to_id)] = singer
             lab = self.class_to_id[singer]
-            print(lab, type(lab))
+
             self.labels.append(lab)
 
     def __len__(self):
