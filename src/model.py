@@ -152,6 +152,7 @@ class CRNN(pl.LightningModule):
         emb = x
         x = self.linear1(x)
         return x, emb
+
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         # print(x.shape)
@@ -203,10 +204,6 @@ class CRNN(pl.LightningModule):
         out = np.squeeze(out)
         return out
 
-
-
-# 8層のCNNモデル
-
 class Backend(nn.Module):
     def __init__(self, class_size, encoder_size=12) -> None:
         super().__init__()
@@ -217,6 +214,8 @@ class Backend(nn.Module):
         elif encoder_size == 24:
             self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(25), requires_grad=True)
             feature_dim = 1024
+        else:
+            raise NotImplementedError
         self.proj  = nn.Linear(feature_dim, feature_dim)
         self.dropout = nn.Dropout(0.5)
         self.classifier=nn.Linear(feature_dim, class_size)
@@ -231,7 +230,6 @@ class Backend(nn.Module):
         x = self.dropout(x)
         x = self.classifier(x)
         return x, feature
-    
 
 class SSLNet(BaseModel):
     def __init__(self,
