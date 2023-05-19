@@ -96,7 +96,7 @@ def torch_rms(y,
 
 def rms_filtering(wav:np.ndarray, th=0.005):
     rms = torch_rms(wav)
-    return rms.mean() > th
+    return torch.mean(rms) > th
 
 def chunk_audio(audio:np.ndarray, chunk_length:int, sr, rms_filter=False):
     # Calculate number of samples per chunk
