@@ -29,7 +29,7 @@ main.py
 '''+++'''
 @hydra.main(config_name="config")
 def main(conf:omegaconf.DictConfig):
-    torch.set_float32_matmul_precision('high')
+    # torch.set_float32_matmul_precision('high')
 
     # パラメータのロギング
     # wandbの準備
@@ -96,7 +96,7 @@ def main(conf:omegaconf.DictConfig):
     if conf.model == "crnn":
         model = CRNN(conf, classes_num=20)
     elif conf.model == "ssl":
-        model = SSLNet(conf,weights=None,url=conf.url,class_num=20)
+        model = SSLNet(conf,url=conf.url,class_num=20)
     else:
         raise NotImplementedError
     # Magic
