@@ -78,7 +78,7 @@ class Artist(torch.utils.data.Dataset):
         self.id_to_class = {}
 
         for fold in set:
-            self.data.extend(sorted(glob.glob(os.path.join(dir, "*_{}_*.pt".format(fold)))))
+            self.data.extend(sorted(glob.glob(os.path.join(dir, "*_{}_*_*.npy".format(fold)))))
         for data in self.data:
             singer = os.path.basename(data.split("-")[0])
             if not singer in self.class_to_id:
@@ -86,7 +86,7 @@ class Artist(torch.utils.data.Dataset):
                 self.id_to_class[len(self.class_to_id)] = singer
             self.labels.append(self.class_to_id[singer])
 
-        for i, category in enumerate():
+        for i, category in enumerate(self.class_to_id.keys()):
             self.class_to_id[category] = i
             self.id_to_class[i] = category
 
