@@ -8,6 +8,7 @@ from torchmetrics import Accuracy, F1Score, ConfusionMatrix
 from transformers import AutoModel
 import numpy as np
 from abc import abstractmethod
+from torchsummary import summary
 
 """
 model.py 
@@ -42,7 +43,6 @@ class BaseModel(pl.LightningModule):
         summary(self, input_size=input_size)
 
     def get_feature(self, z):
-        z = z.to(DEVICE)
         _, feature = self.forward(z)
         if type(feature) == tuple:
             feature = feature[0]
