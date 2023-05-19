@@ -40,7 +40,7 @@ def main(args):
                 label_for_trimmed = [singer_label for x in range(len(trimmed))]
                 for id,  (chunk, lab) in enumerate(zip(trimmed,label_for_trimmed)):
                     save_path = os.path.join(args.save_dir, "{}_{}_{}.pt".format(lab, num, id))
-                    torch.save(save_path, chunk, sr)
+                    torch.save(chunk,save_path)
 
 def derive_desired_wav(audio, old_fs, new_fs):
     if old_fs != new_fs:
