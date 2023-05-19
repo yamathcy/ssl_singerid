@@ -10,6 +10,17 @@ import glob
 preprocess.py
 特徴量の計算やデータの前処理等が必要な場合ここに書く
 """
+def rms_filtering(wav:np.ndarray, th=0.005):
+    rms = librosa.feature.rms(y=wav).squeeze()
+    return rms.mean() > th
+def chunk_audio(audio:np.ndarray, chunk_length:int, sr, rms_filter=False):
+    # Calculate number of samples per chunk
+    samples_per_chunk = int(chunk_length * sr)
+    # Chunk the audio
+    audio_chunks = [audio[...,i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
+    if rms_filter:
+        audio_chunks = [item for item in audio_chunks if rms_filtering(item)]
+    return audio_chunks
 
 
 def resample_dataset(data, sr):
