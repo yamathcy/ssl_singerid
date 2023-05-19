@@ -13,7 +13,7 @@ def main(args):
 
     # クラスカテゴリ名のIDの割り振り
     p = Path(args.dir)
-    singers = [entry.name for entry in p.iterdir() if entry.is_dir()]
+    singers = sorted([entry.name for entry in p.iterdir() if entry.is_dir()])
 
     for i, category in enumerate(singers):
         class_to_id[category] = i
@@ -25,7 +25,7 @@ def main(args):
         singer_path = os.path.join(args.dir, singer)
         p = Path(singer_path)
         albums = sorted([entry.name for entry in p.iterdir() if entry.is_dir()])
-        singer_label = class_to_id[singer]
+        singer_label = singer
         for num, album in enumerate(albums):
             audio_list = sorted(glob.glob(os.path.join(args.dir, singer, album, "*vocal.wav")))
             for file_path in audio_list:
@@ -34,7 +34,6 @@ def main(args):
                 audio, sr = torchaudio.load(file_path)
                 audio = derive_desired_wav(audio, sr, sr)
                 # print(audio.shape)
-
                 # チャンク（無音だけのファイルを除去）してデータにappend
                 trimmed = chunk_audio(audio, args.chunk_length, sr, rms_filter=True)
                 label_for_trimmed = [singer_label for x in range(len(trimmed))]

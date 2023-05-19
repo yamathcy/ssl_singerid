@@ -11,63 +11,90 @@ dataio.py
 ファイルの入出力に関する処理を書く
 """
 
+# class Artist(torch.utils.data.Dataset):
+#     def __init__(self, dir,sr=44100, chunk_length=5, set=[1,2,3,4,5,6]):
+#         self.sr = sr
+#         self.data = []
+#         self.labels = []
+#
+#         # クラス名とIDを相互参照するためのdict
+#         self.class_to_id = {}
+#         self.id_to_class = {}
+#
+#         # クラスカテゴリ名のIDの割り振り
+#         p = Path(dir)
+#         self.singers = [entry.name for entry in p.iterdir() if entry.is_dir()]
+#
+#         for i, category in enumerate(self.singers):
+#             self.class_to_id[category] = i
+#             self.id_to_class[i] = category
+#
+#         # データとラベルの読み込み
+#         for singer in tqdm(self.singers):
+#             print("load singer: {}".format(singer))
+#             singer_path = os.path.join(dir, singer)
+#             p = Path(singer_path)
+#             albums = sorted([entry.name for entry in p.iterdir() if entry.is_dir()])
+#             singer_label = self.class_to_id[singer]
+#             for num, album in enumerate(albums):
+#                 if num not in set:
+#                     # アルバムスプリット，目的のセットでないならパス
+#                     print("{} is not in set {}, skipped".format(num,set))
+#                     continue
+#                 else:
+#                     audio_list = sorted(glob.glob(os.path.join(dir, singer, album, "*vocal.wav")))
+#                     for file_path in audio_list:
+#                         # データ，ラベルの読み込み
+#                         # audio, sr = librosa.load(file_path, sr=self.sr)
+#                         audio, sr = torchaudio.load(file_path)
+#                         audio = derive_desired_wav(audio, sr, self.sr)
+#                         # print(audio.shape)
+#
+#                         # チャンク（無音だけのファイルを除去）してデータにappend
+#                         trimmed = chunk_audio(audio,chunk_length,sr,rms_filter=True)
+#                         label_for_trimmed = [singer_label for x in range(len(trimmed))]
+#                         self.data.extend(trimmed)
+#                         self.labels.extend(label_for_trimmed)
+#
+#                     # 解放
+#                     del audio
+#                     del trimmed
+#
+#     def __len__(self):
+#         return len(self.data)
+#
+#     def __getitem__(self, idx):
+#         return self.data[idx], self.labels[idx]
+#     def get_class_to_id(self):
+#         return self.class_to_id
+
 class Artist(torch.utils.data.Dataset):
-    def __init__(self, dir,sr=44100, chunk_length=5, set=[1,2,3,4,5,6]):
+    def __init__(self, dir, sr=44100, chunk_length=5, set=[0,1,2,3,4,5,6]):
         self.sr = sr
         self.data = []
         self.labels = []
+
+        for fold in set:
+            self.data.extend(sorted(glob.glob(os.path.join(dir, "*_{}_*.pt".format(fold)))))
+        for data in self.data:
+            self.labels.append(int(os.path.basename(data.split("_")[0])))
 
         # クラス名とIDを相互参照するためのdict
         self.class_to_id = {}
         self.id_to_class = {}
 
-        # クラスカテゴリ名のIDの割り振り
-        p = Path(dir)
-        self.singers = [entry.name for entry in p.iterdir() if entry.is_dir()]
-        
-        for i, category in enumerate(self.singers):
+        for i, category in enumerate():
             self.class_to_id[category] = i
             self.id_to_class[i] = category
 
-        # データとラベルの読み込み
-        for singer in tqdm(self.singers):
-            print("load singer: {}".format(singer))
-            singer_path = os.path.join(dir, singer)
-            p = Path(singer_path)
-            albums = sorted([entry.name for entry in p.iterdir() if entry.is_dir()])
-            singer_label = self.class_to_id[singer]
-            for num, album in enumerate(albums):
-                if num not in set:
-                    # アルバムスプリット，目的のセットでないならパス
-                    print("{} is not in set {}, skipped".format(num,set))
-                    continue
-                else:
-                    audio_list = sorted(glob.glob(os.path.join(dir, singer, album, "*vocal.wav")))
-                    for file_path in audio_list:
-                        # データ，ラベルの読み込み
-                        # audio, sr = librosa.load(file_path, sr=self.sr)
-                        audio, sr = torchaudio.load(file_path)
-                        audio = derive_desired_wav(audio, sr, self.sr)
-                        # print(audio.shape)
-
-                        # チャンク（無音だけのファイルを除去）してデータにappend
-                        trimmed = chunk_audio(audio,chunk_length,sr,rms_filter=True)
-                        label_for_trimmed = [singer_label for x in range(len(trimmed))]
-                        self.data.extend(trimmed)
-                        self.labels.extend(label_for_trimmed)
-
-                    # 解放
-                    del audio
-                    del trimmed
-    
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
         return self.data[idx], self.labels[idx]
+
     def get_class_to_id(self):
         return self.class_to_id
-
 
 def derive_desired_wav(audio, old_fs, new_fs):
     if old_fs != new_fs:
