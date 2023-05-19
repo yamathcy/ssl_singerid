@@ -124,7 +124,7 @@ def embed_visualize(dataset, target_class_inv, logger:WandbLogger):
     df = df.astype({'label': int})
     df["label"] = df["label"].replace(target_class_inv)
     plt.figure(figsize=(7,5))
-    sp=sns.scatterplot(data=df,palette="bright",x="x",y="y",hue="label", alpha=.5, linewidth=0.1)
+    sp=sns.scatterplot(data=df,palette="tab20",x="x",y="y",hue="label", alpha=.5, linewidth=0.1)
     plt.title("Embedding")
     plt.legend(bbox_to_anchor=(1.01, 1),borderaxespad=0)
     plt.tight_layout()
