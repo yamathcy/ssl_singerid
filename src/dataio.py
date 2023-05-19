@@ -31,7 +31,7 @@ class Artist(torch.utils.data.Dataset):
             self.id_to_class[i] = category
 
         # データとラベルの読み込み
-        for singer in tqdm(self.singer):
+        for singer in tqdm(self.singers):
             print("load singer: {}".format(singer))
             singer_path = os.path.join(dir, singer)
             p = Path(singer_path)
