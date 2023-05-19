@@ -79,7 +79,7 @@ class Artist(torch.utils.data.Dataset):
 
         for fold in set:
             folddata = sorted(glob.glob(os.path.join(dir, "*-{}-*-*.npy".format(fold))))
-            print('fold data: {}'.format(folddata))
+            # print('fold data: {}'.format(folddata))
             self.data.extend(folddata)
         for data in self.data:
             singer = os.path.basename(data.split("-")[0])
