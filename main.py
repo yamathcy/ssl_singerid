@@ -103,8 +103,8 @@ def main(conf:omegaconf.DictConfig):
     wandb.watch(model, log_freq=100)
 
     # test
-    test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length))).cuda()
-    model = model.cuda()
+    test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length)))
+    model = model
     out,_ = model(test_input)
 
     '''+++'''
