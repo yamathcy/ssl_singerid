@@ -29,6 +29,8 @@ main.py
 '''+++'''
 @hydra.main(config_name="config")
 def main(conf:omegaconf.DictConfig):
+    torch.set_float32_matmul_precision('high')
+    
     # パラメータのロギング
     # wandbの準備
     # wandb.init(config=conf)
