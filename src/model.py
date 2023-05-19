@@ -13,6 +13,67 @@ model.py
 学習に用いるモデルについてを書く
 """
 
+
+class BaseModel(pl.LightningModule):
+    """
+    Base class for all models
+    """
+
+    @abstractmethod
+    def forward(self, *inputs):
+        """
+        Forward pass logic
+
+        :return: Model output
+        """
+        raise NotImplementedError
+
+    def __str__(self):
+        """
+        Model # prints with number of trainable parameters
+        """
+        model_parameters = filter(lambda p: p.requires_grad, self.parameters())
+        params = sum([np.prod(p.size()) for p in model_parameters])
+
+        return super().__str__() + '\nTrainable parameters: {}'.format(params)
+
+    def view_summary(self, input_size):
+        summary(self, input_size=input_size)
+
+    def get_feature(self, z):
+        z = z.to(DEVICE)
+        _, feature = self.forward(z)
+        if type(feature) == tuple:
+            feature = feature[0]
+        return feature
+
+    def predict(self, x):
+        """
+
+        :param x: input tensor (torch.Tensor)
+        :return: single output of model (numpy.array)
+        """
+
+        self.eval()
+        out, _ = self.forward(x)
+        out = torch.argmax(out, dim=1)
+        out = out.cpu().detach().numpy().copy()
+        # out = np.squeeze(out)
+        return out
+
+    def predict_proba(self, x):
+        """
+
+        :param x: input tensor (torch.Tensor)
+        :return: single output of model (numpy.array)
+        """
+        self.eval()
+        out, _ = self.forward(x)
+        out = F.softmax(out, dim=1)  # assuming logits has the shape [batch_size, nb_classes]
+        out = out.cpu().detach().numpy().copy()
+        out = np.squeeze(out)
+        return out
+
 class CRNN(pl.LightningModule):
     """
     Baseline model 
@@ -171,7 +232,7 @@ class Backend(nn.Module):
         return x, feature
     
 
-class SSLNet(pl.LightningModule):
+class SSLNet(BaseModel):
     def __init__(self,
                  conf,
                  weights:dict or list=None,
@@ -208,8 +269,6 @@ class SSLNet(pl.LightningModule):
         # self.class_weights = torch.from_numpy(np.array(class_weights)).float()
 
     def forward(self, x):
-        if len(x.shape) > 2:
-            x = x.squeeze(dim=1)
         print(x.shape)
         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
         x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
@@ -256,23 +315,3 @@ class SSLNet(pl.LightningModule):
         self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
         self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
 
-    def predict(self, x):
-        self.eval()
-        out, _ = self.forward(x)
-        out = torch.argmax(out, dim=1)
-        out = out.cpu().detach().numpy().copy()
-        # out = np.squeeze(out)
-        return out
-
-    def predict_proba(self, x):
-        """
-
-        :param x: input tensor (torch.Tensor)
-        :return: single output of model (numpy.array)
-        """
-        self.eval()
-        out, _ = self.forward(x)
-        out = torch.softmax(out, dim=1)  # assuming logits has the shape [batch_size, nb_classes]
-        out = out.cpu().detach().numpy().copy()
-        out = np.squeeze(out)
-        return out
