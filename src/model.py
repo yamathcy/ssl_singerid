@@ -59,7 +59,7 @@ class CRNN(nn.Module):
     def forward(self, x):
         x = self.audio(x)
         x = self.amplitude_to_db(x)
-        # x = x[:, None, :, :]
+        x = torch.permute(x, (0,1,3,2))
         x = self.drop1(self.mp1(self.Bn1(self.elu(self.Conv1(x)))))
         x = self.drop2(self.mp2(self.Bn2(self.elu(self.Conv2(x)))))
         x = self.drop3(self.mp3(self.Bn3(self.elu(self.Conv3(x)))))
