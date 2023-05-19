@@ -76,16 +76,17 @@ class Artist(torch.utils.data.Dataset):
         # クラス名とIDを相互参照するためのdict
         self.class_to_id = {}
         self.id_to_class = {}
-        print('data: {}'.format(dir))
 
         for fold in set:
-            self.data.extend(sorted(glob.glob(os.path.join(dir, "*-{}-*-*.npy".format(fold)))))
+            folddata = sorted(glob.glob(os.path.join(dir, "*-{}-*-*.npy".format(fold))))
+            print('fold data: {}'.format(folddata))
+            self.data.extend(folddata)
         for data in self.data:
             singer = os.path.basename(data.split("-")[0])
             if not singer in self.class_to_id:
                 self.class_to_id[singer] = len(self.class_to_id)
                 self.id_to_class[len(self.class_to_id)] = singer
-            self.labels.append(self.class_to_id[singer])
+            self.labels.extend(self.class_to_id[singer])
 
     def __len__(self):
         return len(self.data)
