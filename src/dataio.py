@@ -53,7 +53,7 @@ class Artist(torch.utils.data.Dataset):
                         trimmed = chunk_audio(audio,chunk_length,sr,rms_filter=True)
                         label_for_trimmed = [singer_label for x in range(len(trimmed))]
                         self.data.extend(trimmed)
-                        self.labels.extend(singer_label)
+                        self.labels.extend(label_for_trimmed)
 
                     # 解放
                     del audio
