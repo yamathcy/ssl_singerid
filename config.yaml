@@ -1,5 +1,6 @@
 experiment_name: 'sid'
 data_path: "/home/ubuntu/datasets/artist20"
+sr: 16000
 model: 'crnn'
 epoch: 50
 batch_size: 32
