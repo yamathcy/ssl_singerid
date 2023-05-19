@@ -100,13 +100,14 @@ def rms_filtering(wav:np.ndarray, th=0.01):
     rms = torch_rms(wav)
     return torch.mean(rms) > th
 
-def chunk_audio(audio:np.ndarray, chunk_length:int, sr, rms_filter=False):
+def chunk_audio(audio:torch.Tensor, chunk_length:int, sr, rms_filter=False):
     # Calculate number of samples per chunk
     samples_per_chunk = int(chunk_length * sr)
     # Chunk the audio
-    audio_chunks = [audio[...,i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
+    audio =torch.squeeze()
+    audio_chunks = [audio[i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
     print("{} chunks".format(len(audio_chunks)))
     if rms_filter:
-        audio_chunks = [item for item in audio_chunks if rms_filtering(item)]
+        audio_chunks = [torch.unsqueeze(item,dim=0) for item in audio_chunks if rms_filtering(item)]
     print("{}  trimed chunks".format(len(audio_chunks)))
     return audio_chunks
