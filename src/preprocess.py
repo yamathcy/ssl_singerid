@@ -47,7 +47,6 @@ def resample_dataset(args):
         # save the file
         torchaudio.save(save_path, audio_resample, args.sr)
 
-
 if __name__ =='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default="/home/ubuntu/dataset/artist20", help="The path to the dataset")
