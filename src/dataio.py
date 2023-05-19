@@ -87,7 +87,7 @@ class Artist(torch.utils.data.Dataset):
                 self.class_to_id[singer] = int(len(self.class_to_id))
                 self.id_to_class[len(self.class_to_id)] = singer
             lab = self.class_to_id[singer]
-            self.labels.extend(lab)
+            self.labels.append(lab)
 
     def __len__(self):
         return len(self.data)
