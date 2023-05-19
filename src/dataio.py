@@ -104,7 +104,7 @@ def chunk_audio(audio:torch.Tensor, chunk_length:int, sr, rms_filter=False):
     # Calculate number of samples per chunk
     samples_per_chunk = int(chunk_length * sr)
     # Chunk the audio
-    audio =torch.squeeze()
+    audio =torch.squeeze(audio)
     audio_chunks = [audio[i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
     print("{} chunks".format(len(audio_chunks)))
     if rms_filter:
