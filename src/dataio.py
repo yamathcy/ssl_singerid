@@ -83,10 +83,11 @@ class Artist(torch.utils.data.Dataset):
             self.data.extend(folddata)
         for data in self.data:
             singer = os.path.basename(data.split("-")[0])
-            if not singer in self.class_to_id:
-                self.class_to_id[singer] = len(self.class_to_id)
+            if not singer in self.class_to_id.keys():
+                self.class_to_id[singer] = int(len(self.class_to_id))
                 self.id_to_class[len(self.class_to_id)] = singer
-            self.labels.extend(self.class_to_id[singer])
+            lab = self.class_to_id[singer]
+            self.labels.extend(lab)
 
     def __len__(self):
         return len(self.data)
