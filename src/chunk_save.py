@@ -42,7 +42,7 @@ def main(args):
                 label_for_trimmed = [singer_label for x in range(len(trimmed))]
                 for id,  (chunk, lab) in enumerate(zip(trimmed,label_for_trimmed)):
                     try:
-                        save_path = os.path.join(args.save_dir, "{}-{}-{}-{}.pt".format(lab, num, song, id))
+                        save_path = os.path.join(args.save_dir, "{}-{}-{}-{}.npy".format(lab, num, song, id))
                         if not os.path.exists(save_path):
                             chunk = chunk.detach().numpy()
                             np.save(chunk,save_path)
