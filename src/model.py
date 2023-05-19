@@ -268,8 +268,8 @@ class SSLNet(BaseModel):
         # self.class_weights = torch.from_numpy(np.array(class_weights)).float()
 
     def forward(self, x):
-        print(x.shape)
-        x = x.squeeze(dim=1)
+        # print(x.shape)
+        # x = x.squeeze(dim=1)
         print(x.shape)
         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
         x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
