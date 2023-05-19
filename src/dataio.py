@@ -48,6 +48,7 @@ class Artist(torch.utils.data.Dataset):
                         # audio, sr = librosa.load(file_path, sr=self.sr)
                         audio, sr = torchaudio.load(file_path)
                         audio = derive_desired_wav(audio, sr, self.sr)
+                        print(audio.shape)
 
                         # チャンク（無音だけのファイルを除去）してデータにappend
                         trimmed = chunk_audio(audio,chunk_length,sr,rms_filter=True)
@@ -106,4 +107,5 @@ def chunk_audio(audio:np.ndarray, chunk_length:int, sr, rms_filter=False):
     audio_chunks = [audio[...,i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
     if rms_filter:
         audio_chunks = [item for item in audio_chunks if rms_filtering(item)]
+    print("{} chunks".format(len(audio_chunks)))
     return audio_chunks
