@@ -74,11 +74,11 @@ def main(conf:omegaconf.DictConfig):
     # 音ファイルの読み込み
     audio_path = os.path.join(hydra.utils.get_original_cwd(), data_path)
     print("load audio... path: {}".format(audio_path))
-    train_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[0,1,2])
+    train_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[0,1,2,3])
     print("valid")
-    valid_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[3])
+    valid_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[4])
     print("test")
-    test_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[4])
+    test_data = Artist(audio_path, sr=conf.sr, chunk_length=conf.length, set=[5])
     print("chunked audio: train: {}, valid: {}, test: {}".format(len(train_data), len(valid_data), len(test_data)))
 
     # classidを得る
