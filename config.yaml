@@ -1,5 +1,5 @@
 experiment_name: 'sid'
-data_path: "/home/ubuntu/datasets/artist20"
+data_path: "/home/ubuntu/dataset/artist20"
 sr: 16000
 model: 'crnn'
 epoch: 50
