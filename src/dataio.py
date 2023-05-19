@@ -105,7 +105,8 @@ def chunk_audio(audio:np.ndarray, chunk_length:int, sr, rms_filter=False):
     samples_per_chunk = int(chunk_length * sr)
     # Chunk the audio
     audio_chunks = [audio[...,i:i + samples_per_chunk] for i in range(0, len(audio), samples_per_chunk)]
+    print("{} chunks".format(len(audio_chunks)))
     if rms_filter:
         audio_chunks = [item for item in audio_chunks if rms_filtering(item)]
-    print("{} chunks".format(len(audio_chunks)))
+    print("{}  trimed chunks".format(len(audio_chunks)))
     return audio_chunks
