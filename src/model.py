@@ -268,7 +268,8 @@ class SSLNet(BaseModel):
         # self.class_weights = torch.from_numpy(np.array(class_weights)).float()
 
     def forward(self, x):
-        print(x.shape)
+        x = x.squeeze(dim=1)
+        # print(x.shape)
         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
         x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
         h = x["hidden_states"]
@@ -290,7 +291,7 @@ class SSLNet(BaseModel):
     
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
-        print(x.shape)
+        # print(x.shape)
         out,_ = self(x)
         loss = F.cross_entropy(out, y)
         self.log('train_loss', loss, on_epoch=True, on_step=False)
