@@ -9,7 +9,7 @@ def main(args):
     class_to_id = {}
     id_to_class = {}
     args.save_dir = os.path.join(args.dir, "chunked")
-    os.makedirs(args.save_dir, exist_ok=False)
+    os.makedirs(args.save_dir, exist_ok=True)
 
     # クラスカテゴリ名のIDの割り振り
     p = Path(args.dir)
