@@ -28,10 +28,9 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
     label = []
     print("visualize feature dump...")
     for sig, la in tqdm(test_loader):
-        #print(sig.shape)
-        sig = sig.cuda()
+        sig = sig.to("cuda")
+
         la = int(la)
-        model.cuda()
         _ , feature = model(sig)
         feature = feature.detach().cpu().numpy().copy()
         out = model.predict(sig)
