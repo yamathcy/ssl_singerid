@@ -93,7 +93,7 @@ class Artist(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        data = torch.from_numpy(np.load(self.data[idx]),dtype=torch.float32)
+        data = torch.from_numpy(np.load(self.data[idx])).float()
         label = self.labels[idx]
         return data,label
 
