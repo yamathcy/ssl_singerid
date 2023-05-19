@@ -26,7 +26,7 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
     pred = []
     pre_prob = []
     label = []
-    for sig, la, _ in test_loader:
+    for sig, la in test_loader:
 
         #print(sig.shape)
         sig = sig.cuda()
