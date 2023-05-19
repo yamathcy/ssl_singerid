@@ -8,7 +8,7 @@ from umap import UMAP
 import seaborn as sns
 import matplotlib.pylab as plt
 import pandas as pd
-
+from tqdm import tqdm
 """
 eval.py
 学習に用いるモデルについてを書く
@@ -26,7 +26,8 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
     pred = []
     pre_prob = []
     label = []
-    for sig, la in test_loader:
+    print("visualize feature dump...")
+    for sig, la in tqdm(test_loader):
         #print(sig.shape)
         sig = sig.cuda()
         la = int(la)
