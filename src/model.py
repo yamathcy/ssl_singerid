@@ -29,8 +29,6 @@ class CRNN(nn.Module):
                                                         n_fft=2048,
                                                         hop_length=512)
         self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB(top_db=80)
-        
-        self.Bn0 = nn.BatchNorm1d(128)
 
         self.Conv1 = nn.Conv2d(1, 64, (3,3))
         self.Bn1 = nn.BatchNorm2d(64)
@@ -59,7 +57,6 @@ class CRNN(nn.Module):
         self.linear1 = nn.Linear(224, classes_num)
 
     def forward(self, x):
-        x = self.Bn0(x)
         x = self.audio(x)
         x = self.amplitude_to_db(x)
         x = x[:, None, :, :]
