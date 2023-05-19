@@ -87,7 +87,7 @@ def chunk_audio(audio:torch.Tensor, chunk_length:int, sr, rms_filter=False):
     return audio_chunks
 
 
-if __name__ == '__main__':
+if  __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", type=str, default="/home/ubuntu/dataset/artist20", help="The path to the dataset")
     parser.add_argument("--save_dir", type=str, default="/home/ubuntu/dataset/artist20/chunked", help="The path to the dataset")
