@@ -30,6 +30,8 @@ main.py
 @hydra.main(config_name="config")
 def main(conf:omegaconf.DictConfig):
     # パラメータのロギング
+    # wandbの準備
+    # wandb.init(config=conf)
     logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
     logger.log_hyperparams(conf)
 
@@ -49,9 +51,6 @@ def main(conf:omegaconf.DictConfig):
         os.makedirs(dir)
 
     '''+++'''
-
-    # wandbの準備
-    wandb.init(config=conf)
     
     # mlflowの準備
     # mlflow.set_tracking_uri(dir)
