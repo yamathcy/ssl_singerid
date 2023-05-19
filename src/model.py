@@ -201,8 +201,8 @@ class SSLNet(pl.LightningModule):
         self.test_top3 = Accuracy(num_classes=self.num_classes, average='macro', top_k=3, task='multiclass')
         self.test_f1 = F1Score(num_classes=self.num_classes, average='macro', task='multiclass')
         self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
-        class_weights = [float(x) for x in weights.values()]
-        self.class_weights = torch.from_numpy(np.array(class_weights)).float()
+        # class_weights = [float(x) for x in weights.values()]
+        # self.class_weights = torch.from_numpy(np.array(class_weights)).float()
 
 
     def forward(self, x):
