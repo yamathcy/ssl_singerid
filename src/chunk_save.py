@@ -31,8 +31,8 @@ def main(args):
             for song, file_path in enumerate(audio_list):
                 # データ，ラベルの読み込み
                 # audio, sr = librosa.load(file_path, sr=sr)
-                audio, sr = torchaudio.load(file_path)
-                audio = derive_desired_wav(audio, sr, args.sr)
+                audio, fs = torchaudio.load(file_path)
+                audio = derive_desired_wav(audio, fs, args.sr)
                 audio = torch.FloatTensor(audio)
                 # print(audio.shape)
                 # チャンク（無音だけのファイルを除去）してデータにappend
@@ -97,6 +97,7 @@ if  __name__ == '__main__':
     parser.add_argument("--dir", type=str, default="/home/ubuntu/dataset/artist20", help="The path to the dataset")
     parser.add_argument("--save_dir", type=str, default="/home/ubuntu/dataset/artist20/chunked", help="The path to the dataset")
     parser.add_argument("--chunk_length", type=int, default=5, help="The length of chunk in seconds")
+    parser.add_argument("--sr", type=int, default=16000, help="The sampling rate of the audio")
 
     args = parser.parse_args()
     main(args)
