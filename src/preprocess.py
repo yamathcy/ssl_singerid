@@ -23,19 +23,19 @@ def chunk_audio(audio:np.ndarray, chunk_length:int, sr, rms_filter=False):
     return audio_chunks
 
 
-def resample_dataset(data, sr):
+def resample_dataset(args):
     """
     Sample code for resampling the vocal audio data from 44.1kHz to 16kHz, which is the input requirement of wav2vec 2.0
     """
-    audio_list = sorted(glob.glob(os.path.join(data, "**/*vocal.wav"), recursive=True))
+    audio_list = sorted(glob.glob(os.path.join(args.data, "**/*vocal.wav"), recursive=True))
     for dir in tqdm(audio_list):
         audio_path = dir
         save_path = audio_path
         audio, fs = torchaudio.load(audio_path)  # audio: [1, N] for mono or [2, N] for stero
         # resample
-        if fs != sr:
+        if fs != args.sr:
             # resample
-            audio_resample = torchaudio.transforms.Resample(orig_freq=fs, new_freq=sr)(audio)
+            audio_resample = torchaudio.transforms.Resample(orig_freq=fs, new_freq=args.sr)(audio)
         else:
             audio_resample = audio
 
@@ -45,7 +45,7 @@ def resample_dataset(data, sr):
             audio_resample = audio_resample.mean(dim=0, keepdim=True)
 
         # save the file
-        torchaudio.save(save_path, audio_resample, sr)
+        torchaudio.save(save_path, audio_resample, args.sr)
 
 
 if __name__ =='__main__':
