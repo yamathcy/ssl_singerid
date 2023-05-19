@@ -269,7 +269,7 @@ class SSLNet(BaseModel):
 
     def forward(self, x):
         x = x.squeeze(dim=1)
-        # print(x.shape)
+        print(x.shape)
         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
         x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
         h = x["hidden_states"]
