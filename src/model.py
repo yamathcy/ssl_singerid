@@ -208,7 +208,7 @@ class SSLNet(pl.LightningModule):
     def forward(self, x):
         x = x.squeeze(dim=1)
         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
-        x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None, return_dict_attentions=None)
+        x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
         h = x["hidden_states"]
         h = torch.stack(h, dim=3)
         # pad_width = (0, 0, 0, 0, 0, 1)
