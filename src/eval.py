@@ -30,7 +30,7 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
 
         #print(sig.shape)
         sig = sig.cuda()
-        print(type(la))
+        print(la)
         la = int(la)
         model.cuda()
         _ , feature = model(sig)
