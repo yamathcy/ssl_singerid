@@ -22,6 +22,7 @@ class CRNN(pl.LightningModule):
     def __init__(self, conf, classes_num):
         super().__init__()
         self.lr = conf.lr
+        self.num_classes = classes_num
         self.elu = nn.ELU()
         self.softmax = nn.Softmax(dim=1)
 
@@ -483,6 +484,7 @@ class SSLNet(pl.LightningModule):
                  freeze_all=False
                  ):
         super().__init__()
+        self.num_classes = class_num
         self.lr = conf.lr
         encode_size = 24 if "large" in url else 12
         # if param.sr != 16000:
