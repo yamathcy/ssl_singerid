@@ -59,9 +59,9 @@ class CRNN(nn.Module):
         self.linear1 = nn.Linear(224, classes_num)
 
     def forward(self, x):
+        x = self.Bn0(x)
         x = self.audio(x)
         x = self.amplitude_to_db(x)
-        x = self.Bn0(x)
         x = x[:, None, :, :]
         x = self.drop1(self.mp1(self.Bn1(self.elu(self.Conv1(x)))))
         x = self.drop2(self.mp2(self.Bn2(self.elu(self.Conv2(x)))))
