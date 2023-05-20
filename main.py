@@ -31,12 +31,6 @@ main.py
 def main(conf:omegaconf.DictConfig):
     # torch.set_float32_matmul_precision('high')
 
-    # パラメータのロギング
-    # wandbの準備
-    # wandb.init(config=conf)
-    logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
-    logger.log_hyperparams(conf)
-
     # ランダムのシードを決定
     SEED = 42
     torch.backends.cudnn.benchmark = False
@@ -45,12 +39,21 @@ def main(conf:omegaconf.DictConfig):
     pl.seed_everything(SEED)
     np.random.seed(SEED)
 
+
+    # パラメータのロギング
+    # wandbの準備
+    # wandb.init(config=conf)
+    logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
+    logger.log_hyperparams(conf)
+
+
+
     '''+++'''
     # トラッキングを行う場所をチェックし，ログを収納するディレクトリを指定
-    print(hydra.utils.get_original_cwd())
-    dir = hydra.utils.get_original_cwd() + "/mlruns"
-    if not os.path.exists(dir):
-        os.makedirs(dir)
+    # print(hydra.utils.get_original_cwd())
+    # dir = hydra.utils.get_original_cwd() + "/mlruns"
+    # if not os.path.exists(dir):
+    #     os.makedirs(dir)
 
     '''+++'''
     
@@ -103,9 +106,9 @@ def main(conf:omegaconf.DictConfig):
     wandb.watch(model, log_freq=100)
 
     # test
-    test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length)))
-    model = model
-    out,_ = model(test_input)
+    # test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length)))
+    # model = model
+    # out,_ = model(test_input)
 
     '''+++'''
     # 学習

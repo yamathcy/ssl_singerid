@@ -131,3 +131,4 @@ dmypy.json
 .idea/
 .history/
 chunked_data/
+*.ipynb
