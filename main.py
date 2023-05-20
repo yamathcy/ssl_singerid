@@ -29,6 +29,7 @@ main.py
 '''+++'''
 @hydra.main(config_name="config")
 def main(conf:omegaconf.DictConfig):
+    os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
     os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     # torch.set_float32_matmul_precision('high')
 
