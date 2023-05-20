@@ -10,7 +10,7 @@ utils.py
 
 
 # dict型のラベル-ID変換表を更新する
-def label_to_id(label:str, id_dict:dict):
+def label_to_id(label, id_dict):
     id = len(id_dict)
     if label not in id_dict.keys():
         id_dict[label] = id
@@ -18,12 +18,12 @@ def label_to_id(label:str, id_dict:dict):
     return id_dict[label], id_dict
 
 
-def rms_filtering(wav:np.ndarray, th=0.005):
+def rms_filtering(wav, th=0.005):
     rms = librosa.feature.rms(y=wav).squeeze()
     return rms.mean() > th
 
 
-def chunk_audio(audio:np.ndarray, chunk_length:int, sr, rms_filter=False):
+def chunk_audio(audio, chunk_length, sr, rms_filter=False):
     # Calculate number of samples per chunk	
     samples_per_chunk = int(chunk_length * sr)
     # Chunk the audio

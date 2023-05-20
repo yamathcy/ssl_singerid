@@ -15,7 +15,6 @@ model.py
 学習に用いるモデルについてを書く
 """
 
-
 class BaseModel(pl.LightningModule):
     """
     Base class for all models
