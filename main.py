@@ -65,6 +65,7 @@ def main(conf:omegaconf.DictConfig):
     # GPUの準備
     use_cuda = torch.cuda.is_available()
     Device = torch.device("cuda" if use_cuda else "cpu")
+    print(Device)
 
     # 学習したモデルのパラメータ
     out_model_fn = './model/%s' % (conf.savename)
