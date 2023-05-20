@@ -8,7 +8,7 @@ from torchmetrics import Accuracy, F1Score, ConfusionMatrix
 from transformers import AutoModel
 import numpy as np
 from abc import abstractmethod
-from torchsummary import summary
+# from torchsummary import summary
 
 """
 model.py 
@@ -38,9 +38,6 @@ class BaseModel(pl.LightningModule):
         params = sum([np.prod(p.size()) for p in model_parameters])
 
         return super().__str__() + '\nTrainable parameters: {}'.format(params)
-
-    def view_summary(self, input_size):
-        summary(self, input_size=input_size)
 
     def get_feature(self, z):
         _, feature = self.forward(z)
