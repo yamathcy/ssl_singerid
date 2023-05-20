@@ -29,6 +29,7 @@ main.py
 '''+++'''
 @hydra.main(config_name="config")
 def main(conf:omegaconf.DictConfig):
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     # torch.set_float32_matmul_precision('high')
 
     # ランダムのシードを決定
@@ -45,8 +46,6 @@ def main(conf:omegaconf.DictConfig):
     # wandb.init(config=conf)
     logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
     logger.log_hyperparams(conf)
-
-
 
     '''+++'''
     # トラッキングを行う場所をチェックし，ログを収納するディレクトリを指定
