@@ -15,8 +15,6 @@ from src.dataio import *
 from src.preprocess import *
 from src.utils import *
 
-import wandb
-
 """
 main.py
 """
@@ -102,7 +100,7 @@ def main(conf):
     else:
         raise NotImplementedError
     # Magic
-    wandb.watch(model, log_freq=100)
+    # wandb.watch(model, log_freq=100)
 
     # test
     # test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length)))
