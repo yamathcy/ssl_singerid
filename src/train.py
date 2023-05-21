@@ -148,7 +148,7 @@ train.py
 #             total = self.len_epoch
 #         return base.format(current, total, 100.0 * current / total)
 
-def train(model, train_loader, valid_loader, logger, conf):
+def train(model, train_loader, valid_loader, conf, logger):
     print("cuda: {}".format(torch.cuda.is_available()))
     train_loss_list = []
     valid_loss_list = []

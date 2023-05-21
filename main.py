@@ -44,8 +44,8 @@ def main(conf):
     # logging
     # wandb
     # wandb.init(config=conf)
-    # logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
-    # logger.log_hyperparams(conf)
+    logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
+    logger.log_hyperparams(conf)
 
     '''+++'''
     print(hydra.utils.get_original_cwd())
@@ -55,10 +55,10 @@ def main(conf):
 
     '''+++'''
     
-    mlflow
-    mlflow.set_tracking_uri(dir)
-    # tracking_uri = mlflow.get_tracking_uri()
-    mlflow.set_experiment("singer_identification")
+    # mlflow
+    # mlflow.set_tracking_uri(dir)
+    # # tracking_uri = mlflow.get_tracking_uri()
+    # mlflow.set_experiment("singer_identification")
 
     # GPU
     use_cuda = torch.cuda.is_available()

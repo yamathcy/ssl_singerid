@@ -46,17 +46,17 @@ def main(conf):
     # logger.log_hyperparams(conf)
 
     '''+++'''
-    # print(hydra.utils.get_original_cwd())
-    # dir = hydra.utils.get_original_cwd() + "/mlruns"
-    # if not os.path.exists(dir):
-    #     os.makedirs(dir)
+    print(hydra.utils.get_original_cwd())
+    dir = hydra.utils.get_original_cwd() + "/mlruns"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
 
     '''+++'''
     
-    # mlflow
-    # mlflow.set_tracking_uri(dir)
-    # tracking_uri = mlflow.get_tracking_uri()
-    # mlflow.set_experiment(conf.experiment_name)
+    mlflow
+    mlflow.set_tracking_uri(dir)
+    tracking_uri = mlflow.get_tracking_uri()
+    mlflow.set_experiment(conf.experiment_name)
 
     # GPU
     use_cuda = torch.cuda.is_available()
