@@ -106,24 +106,24 @@ def main(conf):
 
     # test
     # test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length)))
-    print("test check...\n")
-    with torch.no_grad():
-        model.eval()
-        for i, data in enumerate(train_loader):
-            x, y = data
-            if i > 0:
-                break
-        test_case = x
-        model = model.cuda()
-        test_case = test_case.cuda()
-        out,_ = model(test_case)
-        print(out.shape)
-        model.train()
+    # print("test check...\n")
+    # with torch.no_grad():
+    #     model.eval()
+    #     for i, data in enumerate(train_loader):
+    #         x, y = data
+    #         if i > 0:
+    #             break
+    #     test_case = x
+    #     model = model.cuda()
+    #     test_case = test_case.cuda()
+    #     out,_ = model(test_case)
+    #     print(out.shape)
+    #     model.train()
 
 
     '''+++'''
     # train
-    model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, max_epochs=conf.epoch, logger=logger)
+    model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, conf=conf, logger=logger)
 
     # evaluation
     evaluation(model, logger, test_loader, target_class)
