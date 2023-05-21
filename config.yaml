@@ -9,3 +9,4 @@ savename: 'exp.pt'
 lr: 3e-4
 url: "microsoft/wavlm-base-plus"
 # fp: '32' # allow '32', 'bf16', '16'
+early_stop: False

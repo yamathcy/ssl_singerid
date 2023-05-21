@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam
 from tqdm import tqdm
+import wandb
 # from torchvision.utils import make_grid
 # from itertools import repeat
 # import pandas as pd
@@ -148,6 +149,9 @@ train.py
 #         return base.format(current, total, 100.0 * current / total)
 
 def train(model, train_loader, valid_loader, logger, conf):
+    print("cuda: {}".format(torch.cuda.is_available()))
+    train_loss_list = []
+    valid_loss_list = []
     max_epochs=conf.epoch
     # device = "cuda"
     # optimizer  = Adam(lr=conf.lr)
@@ -178,3 +182,104 @@ def train(model, train_loader, valid_loader, logger, conf):
         model.train()
     trainer.fit(model, train_loader, valid_loader)
     return model, trainer
+
+
+def train_wo_lightning(model, train_loader, valid_loader, param, logger:wandb.run):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    train_loss_list = []
+    valid_loss_list = []
+    model.to(device)
+
+    # optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=param.lr)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=5)
+    
+    # loss
+    criterion = nn.CrossEntropyLoss()
+    last_loss = np.inf
+    epoch = param.epoch
+
+    for ep in range(epoch):
+        # training loop
+        print("epoch: {}".format(ep))
+        learned_epoch += 1
+        before_loss = np.inf
+        running_train_loss = 0
+        #train
+        model.train()
+        for batch_idx, (data, targets) in enumerate(tqdm(train_loader)):
+            
+            data = data.to(device)
+            targets = targets.to(device)
+            optimizer.zero_grad()
+            output,_ = model(data)
+            loss = criterion(targets,output)
+            loss.backward()
+            running_train_loss += loss.item()
+            optimizer.step()
+        train_loss = running_train_loss / len(train_loader)
+        print("train_loss:{}".format(train_loss))
+        
+        train_loss_list.append(train_loss)
+
+        #valid
+        model.eval()
+        with torch.no_grad():
+            running_valid_loss = 0
+            overall_accuracy = 0
+            for batch_idx, (data, targets) in enumerate(tqdm(valid_loader)):
+                data = data.to(device)
+                targets = targets.to(device)
+                optimizer.zero_grad()
+                output,_ = model(data)
+                loss = criterion(targets,output)
+                running_valid_loss += loss.item()
+                # label = torch.reshape(label, (param['model']['batch_size'], params['slen'], ))
+                loss_eval = criterion(output, targets)
+                running_valid_loss += loss_eval.item()
+                accuracy = acc_epoch(output, targets)
+                
+
+        valid_loss = running_valid_loss / len(valid_loader)
+        acc = overall_accuracy/len(valid_loader)
+        logger.log({"epoch":ep ,"train_loss":train_loss,"valid_loss":valid_loss, "valid_acc":acc})
+
+        # earlystop
+        if param.early_stop:
+            print("patience count: " + str(stop))
+            print("best {} , current{}".format(last_loss,valid_loss))
+            if valid_loss > last_loss:
+                stop += 1
+                print("not improved, count:{}".format(stop))
+                if stop >= 1:
+                    print("early stopping")
+                    break
+            else: 
+                print("valid loss improved")
+                last_loss = valid_loss
+                stop = 0
+
+    train_loss_list = np.array(train_loss_list)
+    valid_loss_list = np.array(valid_loss_list)
+    loss_list = (train_loss_list, valid_loss_list)
+    # state = {'model': model.state_dict(), 'optimizer': optimizer.state_dict()}
+    torch.save(model.state_dict(), str(ep) + '.pth')
+    logger.log_artifact(str(ep) + '.pth')
+    logger.log_metric("epoch", learned_epoch)
+    return (model, loss_list)
+
+
+def acc_epoch(pred, target, thresholds=0.5):
+    pred = torch.where(pred>thresholds, 1, 0)
+    acc = torch.sum(pred == target) / torch.numel(pred)
+
+    acc = acc.data.cpu().detach().numpy().copy()
+    # print('acc: ', acc)
+    return acc
+
+
+    
+
+
+
+
