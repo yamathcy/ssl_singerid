@@ -3,11 +3,12 @@ hydra-core
 librosa
 mlflow
 pytorch-lightning
-torch
-torchaudio
+torch==1.13.1+cu117
+torchaudio==0.13.1+cu117
+torchtext==0.15.1
+torchvision==0.14.1+cu117
 torchmetrics
 torchsummary
-torchvision
 tqdm
 wandb
 seaborn
