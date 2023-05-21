@@ -217,6 +217,7 @@ def train_wo_lightning(model, train_loader, valid_loader, param, logger:wandb.ru
             loss.backward()
             running_train_loss += loss.item()
             optimizer.step()
+            scheduler.step()
         train_loss = running_train_loss / len(train_loader)
         print("train_loss:{}".format(train_loss))
         
@@ -265,7 +266,7 @@ def train_wo_lightning(model, train_loader, valid_loader, param, logger:wandb.ru
     # state = {'model': model.state_dict(), 'optimizer': optimizer.state_dict()}
     torch.save(model.state_dict(), str(ep) + '.pth')
     logger.log_artifact(str(ep) + '.pth')
-    logger.log_metric("epoch", learned_epoch)
+    # logger.log_metric("epoch", learned_epoch)
     return (model, loss_list)
 
 
