@@ -6,11 +6,11 @@ from tqdm import tqdm
 import glob
 from pathlib import Path
 import torchaudio
+
 """
 dataio.py
 ファイルの入出力に関する処理を書く
 """
-
 # class Artist(torch.utils.data.Dataset):
 #     def __init__(self, dir,sr=44100, chunk_length=5, set=[1,2,3,4,5,6]):
 #         self.sr = sr
@@ -69,7 +69,7 @@ dataio.py
 #         return self.class_to_id
 
 class Artist(torch.utils.data.Dataset):
-    def __init__(self, dir, sr=44100, chunk_length=5, set=[0,1,2,3,4,5,6]):
+    def __init__(self, dir, sr=44100, chunk_length=5, set=[0,1,2,3,4,5,6], transforms=None):
         self.sr = sr
         self.data = []
         self.labels = []
@@ -89,13 +89,18 @@ class Artist(torch.utils.data.Dataset):
             lab = self.class_to_id[singer]
             self.labels.append(lab)
 
+        self.transforms = transforms
+
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        data = torch.from_numpy(np.load(self.data[idx]))
+        data = np.load(self.data[idx])
+        data = torch.from_numpy(data).clone()
         # data = torch.rand((1,80000))
         label = self.labels[idx]
+        if self.transforms:
+            data = self.transforms(data)
         return data,label
 
     def get_class_to_id(self):

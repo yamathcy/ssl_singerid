@@ -132,3 +132,4 @@ dmypy.json
 .history/
 chunked_data/
 *.ipynb
+hfmodels/
