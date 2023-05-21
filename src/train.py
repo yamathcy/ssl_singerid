@@ -184,7 +184,7 @@ def train(model, train_loader, valid_loader, logger, conf):
     return model, trainer
 
 
-def train_wo_lightning(model, train_loader, valid_loader, param, logger):
+def train_wo_lightning(model, train_loader, valid_loader, param, logger=None):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     train_loss_list = []
     valid_loss_list = []
