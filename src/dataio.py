@@ -78,7 +78,7 @@ class Artist(torch.utils.data.Dataset):
         self.id_to_class = {}
 
         for fold in set:
-            folddata = sorted(glob.glob(os.path.join(dir, "*-{}-*-*.npy".format(fold))))
+            folddata = sorted(glob.glob(os.path.join(dir, "*-{}-*-*.wav".format(fold))))
             # print('fold data: {}'.format(folddata))
             self.data.extend(folddata)
         for data in self.data:
@@ -95,8 +95,9 @@ class Artist(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        data = np.load(self.data[idx])
-        data = torch.from_numpy(data).clone()
+        # data = np.load(self.data[idx])
+        # data = torch.from_numpy(data).clone()
+        data,_ = torchaudio.load(self.data[idx])
         # data = torch.rand((1,80000))
         label = self.labels[idx]
         if self.transforms:
