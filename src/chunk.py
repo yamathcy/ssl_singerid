@@ -112,4 +112,4 @@ if __name__ == '__main__':
     parser.add_argument("--sr", type=int, default=16000, help="The threshold to split the songs")
     parser.add_argument("--length", type=float, default=5.0, help="The threshold to split the songs")
     args = parser.parse_args()
-    main()
+    main(args)
