@@ -111,7 +111,7 @@ def main(conf):
 
     '''+++'''
     # train
-    model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, max_epochs=conf.epoch, logger=logger, fp=conf.fp)
+    model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, max_epochs=conf.epoch, logger=logger)
 
     # evaluation
     evaluation(model, logger, test_loader, target_class)
