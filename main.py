@@ -106,6 +106,7 @@ def main(conf):
 
     # test
     # test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length)))
+    print("test check...\n")
     with torch.no_grad():
         model.eval()
         for i, data in enumerate(train_loader):
