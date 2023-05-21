@@ -106,8 +106,15 @@ def main(conf):
 
     # test
     # test_input = torch.rand((conf.batch_size,1,int(conf.sr*conf.length)))
-    # model = model
-    # out,_ = model(test_input)
+    with torch.no_grad():
+        tmp = train_loader.__iter__()
+        x1, _ = tmp.next() 
+        test_case = x1
+        model = model.cuda()
+        test_case = test_case.cuda()
+        out,_ = model(test_case)
+        print(out.shape)
+        
 
     '''+++'''
     # train
