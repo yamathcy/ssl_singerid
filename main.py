@@ -44,21 +44,21 @@ def main(conf):
     # logging
     # wandb
     # wandb.init(config=conf)
-    logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
-    logger.log_hyperparams(conf)
+    # logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
+    # logger.log_hyperparams(conf)
 
     '''+++'''
-    # print(hydra.utils.get_original_cwd())
-    # dir = hydra.utils.get_original_cwd() + "/mlruns"
-    # if not os.path.exists(dir):
-    #     os.makedirs(dir)
+    print(hydra.utils.get_original_cwd())
+    dir = hydra.utils.get_original_cwd() + "/mlruns"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
 
     '''+++'''
     
-    # mlflow
-    # mlflow.set_tracking_uri(dir)
+    mlflow
+    mlflow.set_tracking_uri(dir)
     # tracking_uri = mlflow.get_tracking_uri()
-    # mlflow.set_experiment(conf.experiment_name)
+    mlflow.set_experiment("singer_identification")
 
     # GPU
     use_cuda = torch.cuda.is_available()
@@ -126,7 +126,7 @@ def main(conf):
     model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, conf=conf, logger=logger)
 
     # evaluation
-    evaluation(model, logger, test_loader, target_class)
+    evaluation(model, test_loader, target_class)
 
     '''+++'''
 

@@ -184,7 +184,7 @@ def train(model, train_loader, valid_loader, logger, conf):
     return model, trainer
 
 
-def train_wo_lightning(model, train_loader, valid_loader, param, logger:wandb.run):
+def train_wo_lightning(model, train_loader, valid_loader, param, logger):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     train_loss_list = []
     valid_loss_list = []
@@ -243,7 +243,7 @@ def train_wo_lightning(model, train_loader, valid_loader, param, logger:wandb.ru
 
         valid_loss = running_valid_loss / len(valid_loader)
         acc = overall_accuracy/len(valid_loader)
-        logger.log({"epoch":ep ,"train_loss":train_loss,"valid_loss":valid_loss, "valid_acc":acc})
+        # logger.log({"epoch":ep ,"train_loss":train_loss,"valid_loss":valid_loss, "valid_acc":acc})
 
         # earlystop
         if param.early_stop:
@@ -266,8 +266,8 @@ def train_wo_lightning(model, train_loader, valid_loader, param, logger:wandb.ru
     loss_list = (train_loss_list, valid_loss_list)
     # state = {'model': model.state_dict(), 'optimizer': optimizer.state_dict()}
     torch.save(model.state_dict(), str(ep) + '.pth')
-    logger.log_artifact(str(ep) + '.pth')
-    logger.log("actual_epoch", learned_epoch)
+    # logger.log_artifact(str(ep) + '.pth')
+    # logger.log("actual_epoch", learned_epoch)
     return (model, loss_list)
 
 

@@ -9,12 +9,13 @@ import seaborn as sns
 import matplotlib.pylab as plt
 import pandas as pd
 from tqdm import tqdm
+import mlflow
 """
 eval.py
 学習に用いるモデルについてを書く
 """
 
-def evaluation(model, logger:WandbLogger, test_loader, target_class):
+def evaluation(model, test_loader, target_class, logger=None):
     """
     モデルとtrainer, test用のdataloaderを用いてテストデータでの評価を行う
     :param model:
@@ -44,7 +45,7 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
     pre_prob = np.array(pre_prob)
     label = np.array(label)
     target_class_inv = {v: k for k, v in target_class.items()}
-    embed_visualize((feature_vecs, label),target_class_inv, logger)
+    # embed_visualize((feature_vecs, label),target_class_inv, )
     accuracy = accuracy_score(y_true=label, y_pred=pred)
     balanced = balanced_accuracy_score(y_true=label, y_pred=pred)
     top_2 = top_k_accuracy_score(k=2,y_score=pre_prob, y_true=label)
@@ -70,7 +71,8 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
     print("f1-score: {:.3f}".format(macrof1))
     plt.tight_layout()
     plt.savefig("confusion_matrix.png")
-    logger.log_image(key='confusion_matrix', images=['confusion_matrix.png'])
+    # mlflow.log_artifact(key='confusion_matrix', images=['confusion_matrix.png'])
+
     with open("result.txt", 'a') as f:
         print("---Accuracy Report---", file=f)
         print("Overall accracy:{:.3f}".format(accuracy) ,file=f)
@@ -80,12 +82,13 @@ def evaluation(model, logger:WandbLogger, test_loader, target_class):
         print("f1-score: {:.3f}".format(macrof1))
         print(report, file=f)
     # logger.use_artifact("result.txt", artifact_type='text')
-    logger.log({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
+    mlflow.log_metrics({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
     # logger.use_artifact("confusion_matrix.png", artifact_type='image')
     # logger.use_artifact("embedding.png", artifact_type='image')
     for label_name, val in zip(report_dict.keys(), report_dict.values()):
         try:
-            logger.log({"class_f1_" + label_name:val['f1-score']})
+            # logger.log({"class_f1_" + label_name:val['f1-score']})
+            mlflow.log_metrics({"class_f1_" + label_name:val['f1-score']})
         except:
             pass
     

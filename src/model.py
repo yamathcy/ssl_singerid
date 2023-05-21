@@ -331,7 +331,7 @@ class SSLNet(nn.Module):
         #     self.resampler = torchaudio.transforms.Resample(orig_freq=param.sr, new_freq=16000)
         # else:
         #     self.resampler = nn.Identity()
-        self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True,cache_dir='./hfmodels')
+        self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True, cache_dir='./hfmodels')
         
         if freeze_all:
             for p in self.frontend.parameters():

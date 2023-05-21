@@ -43,7 +43,7 @@ def main(conf):
 
     # logging
     # wandb
-    logger = wandb.init(config=conf)
+    # logger = wandb.init(config=conf)
     # logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
     # logger.log_hyperparams(conf)
 
@@ -123,10 +123,10 @@ def main(conf):
 
     '''+++'''
     # train
-    model,_ = train_wo_lightning(model, train_loader=train_loader, valid_loader=valid_loader, param=conf, logger=logger)
+    model,_ = train_wo_lightning(model, train_loader=train_loader, valid_loader=valid_loader, param=conf)
 
     # evaluation
-    evaluation(model, logger, test_loader, target_class)
+    evaluation(model, test_loader, target_class)
 
     '''+++'''
 
