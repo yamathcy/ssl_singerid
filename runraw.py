@@ -123,7 +123,7 @@ def main(conf):
 
     '''+++'''
     # train
-    model,_ = train(model, train_loader=train_loader, valid_loader=valid_loader, conf=conf, logger=logger)
+    model,_ = train_wo_lightning(model, train_loader=train_loader, valid_loader=valid_loader, conf=conf, logger=logger)
 
     # evaluation
     evaluation(model, logger, test_loader, target_class)
