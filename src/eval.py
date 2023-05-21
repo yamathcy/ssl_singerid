@@ -45,7 +45,7 @@ def evaluation(model, test_loader, target_class, logger=None):
     pre_prob = np.array(pre_prob)
     label = np.array(label)
     target_class_inv = {v: k for k, v in target_class.items()}
-    # embed_visualize((feature_vecs, label),target_class_inv, )
+    embed_visualize((feature_vecs, label),target_class_inv)
     accuracy = accuracy_score(y_true=label, y_pred=pred)
     balanced = balanced_accuracy_score(y_true=label, y_pred=pred)
     top_2 = top_k_accuracy_score(k=2,y_score=pre_prob, y_true=label)
@@ -110,7 +110,7 @@ def single_test(model:torch.nn.Module, data):
     return output
 
 
-def embed_visualize(dataset, target_class_inv, logger:WandbLogger):
+def embed_visualize(dataset, target_class_inv, logger=None):
     # dataset must be set of (extracted_feature, label)
     # visualize tsne deep
     sns.set()
@@ -133,5 +133,9 @@ def embed_visualize(dataset, target_class_inv, logger:WandbLogger):
     plt.tight_layout()
     fig=sp.get_figure()
     fig.savefig("embedding.png")
-    logger.log_image(key='embedding', images=['embedding.png'])
+    if logger:
+        logger.log_image(key='embedding', images=['embedding.png'])
+    else:
+        mlflow.log_artifact('embedding.png')
+    
 
