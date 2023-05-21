@@ -98,6 +98,7 @@ class Artist(torch.utils.data.Dataset):
         # data = np.load(self.data[idx])
         # data = torch.from_numpy(data).clone()
         data,_ = torchaudio.load(self.data[idx])
+        data = data.squeeze(dim=1)
         # data = torch.rand((1,80000))
         label = self.labels[idx]
         if self.transforms:
