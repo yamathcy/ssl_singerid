@@ -15,7 +15,7 @@ eval.py
 学習に用いるモデルについてを書く
 """
 
-def evaluation(model, test_loader, target_class, logger=None):
+def evaluation(model, test_loader, target_class, logger:WandbLogger):
     """
     モデルとtrainer, test用のdataloaderを用いてテストデータでの評価を行う
     :param model:
