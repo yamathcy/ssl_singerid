@@ -237,13 +237,14 @@ class SSLNet(BaseModel):
 
         self.num_classes = class_num
         self.lr = conf.lr
+        url = conf.url
+        freeze_all = conf.freeze_all
         encode_size = 24 if "large" in url else 12
         # if param.sr != 16000:
         #     self.resampler = torchaudio.transforms.Resample(orig_freq=param.sr, new_freq=16000)
         # else:
         #     self.resampler = nn.Identity()
-        url = conf.url
-        freeze_all = conf.freeze_all
+        
         self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True,cache_dir='./hfmodels')
         
         if freeze_all:
