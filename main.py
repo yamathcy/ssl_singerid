@@ -36,7 +36,7 @@ def main(conf):
     SEED = 42
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
-    torch.use_deterministic_algorithms(True)
+    # torch.use_deterministic_algorithms(True)
     pl.seed_everything(SEED)
     np.random.seed(SEED)
 
