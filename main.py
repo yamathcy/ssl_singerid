@@ -127,7 +127,7 @@ def main(conf):
     model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, conf=conf, logger=logger)
 
     # evaluation
-    evaluation(model, test_loader, target_class)
+    evaluation(model, test_loader, target_class, logger=logger)
 
     '''+++'''
 
