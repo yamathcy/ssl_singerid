@@ -92,7 +92,17 @@ def evaluation(model, test_loader, target_class, logger=None):
             # mlflow.log_metrics({"class_f1_" + label_name:val['f1-score']})
         except:
             pass
-    
+    try:
+        lw = model.get_layer_weight()
+        lw.squeeze()
+        print(lw)
+        plt.plot(lw)
+        plt.savefig("layer_weight.png")
+        logger.use_artifact("layer_weight.png", artifact_type='image')
+
+    except:
+        pass
+
     return accuracy, balanced, top_2, top_3, df_cmx, report_dict
 
 

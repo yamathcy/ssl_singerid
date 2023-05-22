@@ -107,6 +107,46 @@ class Artist(torch.utils.data.Dataset):
 
     def get_class_to_id(self):
         return self.class_to_id
+    
+class Artist_from_numpy(torch.utils.data.Dataset):
+    def __init__(self, dir, sr=44100, chunk_length=5, set=[0,1,2,3,4,5,6], transforms=None):
+        self.sr = sr
+        self.data = []
+        self.labels = []
+        # クラス名とIDを相互参照するためのdict
+        self.class_to_id = {}
+        self.id_to_class = {}
+
+        for fold in set:
+            folddata = sorted(glob.glob(os.path.join(dir, "*-{}-*-*.wav".format(fold))))
+            # print('fold data: {}'.format(folddata))
+            self.data.extend(folddata)
+        for data in self.data:
+            singer = os.path.basename(data.split("-")[0])
+            if not singer in self.class_to_id.keys():
+                self.class_to_id[singer] = int(len(self.class_to_id))
+                self.id_to_class[len(self.class_to_id)] = singer
+            lab = self.class_to_id[singer]
+            self.labels.append(lab)
+
+        self.transforms = transforms
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        data = np.load(self.data[idx])
+        data = torch.from_numpy(data).clone()
+        # data,_ = torchaudio.load(self.data[idx])
+        # data = data.squeeze(dim=1)
+        # data = torch.rand((1,80000))
+        label = self.labels[idx]
+        if self.transforms:
+            data = self.transforms(data)
+        return data,label
+
+    def get_class_to_id(self):
+        return self.class_to_id
 
 def derive_desired_wav(audio, old_fs, new_fs):
     if old_fs != new_fs:
