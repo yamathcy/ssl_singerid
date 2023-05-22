@@ -63,14 +63,14 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.title("Confusion matrix")
+    plt.tight_layout()
+    plt.savefig("confusion_matrix.png")
     print("---Accuracy Report---")
     print("Overall accracy:{:.3f}".format(accuracy))
     print("Overall balanced accracy:{:.3f}".format(balanced))
     print("Top-2:{:.3f}".format(top_2))
     print("Top-3:{:.3f}".format(top_3))
     print("f1-score: {:.3f}".format(macrof1))
-    plt.tight_layout()
-    plt.savefig("confusion_matrix.png")
     # mlflow.log_artifact(key='confusion_matrix', images=['confusion_matrix.png'])
 
     with open("result.txt", 'a') as f:
@@ -102,6 +102,7 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
         logger.use_artifact("layer_weight.png", artifact_type='image')
 
     except:
+        print("weight failed")
         pass
 
     return accuracy, balanced, top_2, top_3, df_cmx, report_dict

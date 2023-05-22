@@ -282,7 +282,7 @@ class SSLNet(BaseModel):
     
     def get_layer_weight(self):
         lw = torch.sigmoid(self.backend.layer_weights)
-        lw.detach().cpu()
+        lw.detach().cpu().numpy().copy()
         return lw
     
     def training_step(self, train_batch, batch_idx):
