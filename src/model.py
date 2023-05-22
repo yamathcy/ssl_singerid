@@ -231,9 +231,7 @@ class SSLNet(BaseModel):
     def __init__(self,
                  conf,
                  weights:dict or list=None,
-                 url="microsoft/wavlm-base-plus",
                  class_num=10,
-                 freeze_all=False
                  ):
         super().__init__()
 
@@ -244,6 +242,8 @@ class SSLNet(BaseModel):
         #     self.resampler = torchaudio.transforms.Resample(orig_freq=param.sr, new_freq=16000)
         # else:
         #     self.resampler = nn.Identity()
+        url = conf.url
+        freeze_all = conf.freeze_all
         self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True,cache_dir='./hfmodels')
         
         if freeze_all:
