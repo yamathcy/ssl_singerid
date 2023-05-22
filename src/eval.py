@@ -83,12 +83,12 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
         print(report, file=f)
     # logger.use_artifact("result.txt", artifact_type='text')
     # mlflow.log_metrics({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
-    logger.log({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
+    logger.log_metrics({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
     logger.use_artifact("confusion_matrix.png", artifact_type='image')
     logger.use_artifact("embedding.png", artifact_type='image')
     for label_name, val in zip(report_dict.keys(), report_dict.values()):
         try:
-            logger.log({"class_f1_" + label_name:val['f1-score']})
+            logger.log_metrics({"class_f1_" + label_name:val['f1-score']})
             # mlflow.log_metrics({"class_f1_" + label_name:val['f1-score']})
         except:
             pass
