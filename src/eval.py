@@ -97,6 +97,7 @@ def evaluation(model, test_loader, target_class, logger=None):
         lw.squeeze()
         print(lw)
         plt.plot(lw)
+        plt.tight_layout()
         plt.savefig("layer_weight.png")
         logger.use_artifact("layer_weight.png", artifact_type='image')
 
