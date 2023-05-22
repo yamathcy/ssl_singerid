@@ -9,7 +9,7 @@ import seaborn as sns
 import matplotlib.pylab as plt
 import pandas as pd
 from tqdm import tqdm
-import mlflow
+# import mlflow
 """
 eval.py
 学習に用いるモデルについてを書く
@@ -147,6 +147,6 @@ def embed_visualize(dataset, target_class_inv, logger=None):
     if logger:
         logger.log_image(key='embedding', images=['embedding.png'])
     else:
-        mlflow.log_artifact('embedding.png')
+        # mlflow.log_artifact('embedding.png')
     
 

@@ -165,7 +165,7 @@ def train(model, train_loader, valid_loader, conf, logger):
     #     loss.backward()
     #     optimizer.step()
     early_stop_callback = EarlyStopping(monitor="val_loss", min_delta=0.00, patience=5, verbose=False, mode="min")
-    trainer = pl.Trainer(max_epochs=max_epochs, check_val_every_n_epoch=10, logger=logger, callbacks=[early_stop_callback],devices=[0])
+    trainer = pl.Trainer(max_epochs=max_epochs, check_val_every_n_epoch=5, logger=logger, callbacks=[early_stop_callback],devices=[0])
     print("test check...\n")
     with torch.no_grad():
         model.eval()
