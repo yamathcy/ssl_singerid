@@ -99,6 +99,7 @@ def main(conf):
         model = CRNN(conf, classes_num=20)
     elif conf.model == "ssl":
         model = SSLNet(conf,url=conf.url,class_num=20)
+        print(type(model))
     else:
         raise NotImplementedError
     # Magic
