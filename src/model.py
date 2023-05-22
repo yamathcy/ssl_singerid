@@ -313,7 +313,7 @@ class SSLNet(BaseModel):
         self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
 
 
-class SSLNet(nn.Module):
+class SSLNet_RAW(nn.Module):
     def __init__(self,
                  conf,
                  weights:dict or list=None,
