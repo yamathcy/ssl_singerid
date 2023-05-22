@@ -84,7 +84,7 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
     # logger.use_artifact("result.txt", artifact_type='text')
     # mlflow.log_metrics({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
     logger.log_metrics({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
-    logger.image(key='confusion_matrix', images=['confusion_matrix.png'])
+    logger.log_image(key='confusion_matrix', images=['confusion_matrix.png'])
     for label_name, val in zip(report_dict.keys(), report_dict.values()):
         try:
             logger.log_metrics({"class_f1_" + label_name:val['f1-score']})
@@ -98,7 +98,7 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
         plt.plot(lw)
         plt.tight_layout()
         plt.savefig("layer_weight.png")
-        logger.image(key='layer_weight', images=['layer_weight.png'])
+        logger.log_image(key='layer_weight', images=['layer_weight.png'])
 
     except:
         print("weight failed")
