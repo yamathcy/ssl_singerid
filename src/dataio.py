@@ -118,7 +118,7 @@ class Artist_from_numpy(torch.utils.data.Dataset):
         self.id_to_class = {}
 
         for fold in set:
-            folddata = sorted(glob.glob(os.path.join(dir, "*-{}-*-*.wav".format(fold))))
+            folddata = sorted(glob.glob(os.path.join(dir, "*-{}-*-*.npy".format(fold))))
             # print('fold data: {}'.format(folddata))
             self.data.extend(folddata)
         for data in self.data:
