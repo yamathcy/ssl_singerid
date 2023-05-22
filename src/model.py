@@ -237,21 +237,18 @@ class SSLNet(BaseModel):
 
         self.num_classes = class_num
         self.lr = conf.lr
-        url = conf.url
-        freeze_all = conf.freeze_all
-        encode_size = 24 if "large" in url else 12
+        self.url = conf.url
+        self.freeze_all = conf.freeze_all
+        encode_size = 24 if "large" in self.url else 12
         # if param.sr != 16000:
         #     self.resampler = torchaudio.transforms.Resample(orig_freq=param.sr, new_freq=16000)
         # else:
         #     self.resampler = nn.Identity()
         
-        self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True,cache_dir='./hfmodels')
+        self.frontend = AutoModel.from_pretrained(self.url, trust_remote_code=True,cache_dir='./hfmodels')
         
-        if freeze_all:
-            for p in self.frontend.parameters():
-                p.requires_grad = False
-        else:
-            self.frontend.feature_extractor._freeze_parameters()
+        for p in self.frontend.parameters():
+            p.requires_grad = False
         self.backend = Backend(class_num, encoder_size=encode_size)
 
         self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
@@ -263,6 +260,7 @@ class SSLNet(BaseModel):
         self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
         # class_weights = [float(x) for x in weights.values()]
         # self.class_weights = torch.from_numpy(np.array(class_weights)).float()
+        self.conf = conf
 
     def forward(self, x):
         # print(x.shape)
@@ -313,6 +311,12 @@ class SSLNet(BaseModel):
         self.log('test_top3_accuracy', self.test_top3(out, y), on_epoch=True, on_step=False)
         self.log('test_confusion', self.confusion(out, y), on_epoch=False, on_step=False)
 
+    def on_training_epoch_start(self):
+        if (self.current_epoch > self.conf.lin_epoch) and self.freeze_all:
+            for p in self.frontend.parameters():
+                p.requires_grad = True
+                self.frontend.feature_extractor._freeze_parameters()
+
 
 class SSLNet_RAW(nn.Module):
     def __init__(self,
@@ -324,7 +328,7 @@ class SSLNet_RAW(nn.Module):
                  ):
         
         super().__init__()
-
+        self.conf = conf
         self.num_classes = class_num
         self.lr = conf.lr
         encode_size = 24 if "large" in url else 12
@@ -334,11 +338,10 @@ class SSLNet_RAW(nn.Module):
         #     self.resampler = nn.Identity()
         self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True, cache_dir='./hfmodels')
         
-        if freeze_all:
-            for p in self.frontend.parameters():
-                p.requires_grad = False
-        else:
-            self.frontend.feature_extractor._freeze_parameters()
+
+        for p in self.frontend.parameters():
+            p.requires_grad = False
+        
         self.backend = Backend(class_num, encoder_size=encode_size)
 
         self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
@@ -373,3 +376,10 @@ class SSLNet_RAW(nn.Module):
         lw = torch.sigmoid(self.backend.layer_weights)
         lw.detach().cpu()
         return lw
+
+    def on_training_epoch_start(self):
+        if (self.current_epoch > self.conf.lin_epoch) and self.conf.freeze_all:
+            for p in self.frontend.parameters():
+                p.requires_grad = True
+                self.frontend.feature_extractor._freeze_parameters()
+
