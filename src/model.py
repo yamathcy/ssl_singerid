@@ -374,7 +374,7 @@ class SSLNet_RAW(nn.Module):
     
     def get_layer_weight(self):
         lw = torch.softmax(self.backend.layer_weights)
-        lw.detach().cpu()
+        lw.detach().cpu().numpy()
         return lw
 
     def on_training_epoch_start(self):
