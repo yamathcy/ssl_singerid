@@ -379,7 +379,7 @@ class SSLNet_RAW(nn.Module):
         return lw
 
     def on_training_epoch_start(self):
-        if (self.current_epoch > self.conf.lin_epoch) and self.conf.freeze_all:
+        if (self.current_epoch > self.conf.lin_epoch):
             for p in self.frontend.parameters():
                 p.requires_grad = True
                 self.frontend.feature_extractor._freeze_parameters()
