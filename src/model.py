@@ -373,7 +373,8 @@ class SSLNet_RAW(nn.Module):
         return optimizer
     
     def get_layer_weight(self):
-        lw = torch.softmax(self.backend.layer_weights)
+
+        lw = torch.softmax(torch.squeeze(self.backend.layer_weights), dim=0)
         lw.detach().cpu().numpy()
         return lw
 
