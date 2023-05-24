@@ -386,5 +386,5 @@ class SSLNet_RAW(nn.Module):
                 p.requires_grad = True
                 self.frontend.feature_extractor._freeze_parameters()
         else:
-            print("probe epoch")
+            print("probe ep")
 
