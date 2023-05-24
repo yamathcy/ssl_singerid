@@ -116,7 +116,7 @@ class Artist_from_numpy(torch.utils.data.Dataset):
         # クラス名とIDを相互参照するためのdict
         self.class_to_id = {}
         self.id_to_class = {}
-
+        print("load audio from", dir)
         for fold in set:
             folddata = sorted(glob.glob(os.path.join(dir, "*-{}-*-*.npy".format(fold))))
             print("data sample:{}".len(folddata))
