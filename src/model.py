@@ -379,6 +379,7 @@ class SSLNet_RAW(nn.Module):
 
     def on_training_epoch_start(self):
         if (self.current_epoch > self.conf.lin_epoch):
+            print("finetune epoch")
             for p in self.frontend.parameters():
                 self.lr=5e-5
                 p.requires_grad = True
