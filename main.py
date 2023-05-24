@@ -76,8 +76,9 @@ def main(conf):
     # df = pd.read_csv(meta_path)
 
     # soundfile
-    audio_path = os.path.join(hydra.utils.get_original_cwd(), data_path)
-    print("load audio... path: {}".format(audio_path))
+    # audio_path = os.path.join(hydra.utils.get_original_cwd(), data_path)
+    audio_path = data_path
+    print("load audio... path: {}".format(data_path))
     train_data = Artist_from_numpy(audio_path, sr=conf.sr, chunk_length=conf.length, set=[0,1,2,3])
     print("valid")
     valid_data = Artist_from_numpy(audio_path, sr=conf.sr, chunk_length=conf.length, set=[4])
