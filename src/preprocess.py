@@ -6,10 +6,8 @@ import torchaudio
 from tqdm import tqdm
 import argparse
 import glob
-"""
-preprocess.py
-特徴量の計算やデータの前処理等が必要な場合ここに書く
-"""
+
+
 def rms_filtering(wav:np.ndarray, th=0.005):
     rms = librosa.feature.rms(y=wav).squeeze()
     return rms.mean() > th
@@ -49,7 +47,7 @@ def resample_dataset(args):
 
 if __name__ =='__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", type=str, default="/home/ubuntu/dataset/artist20", help="The path to the dataset")
-    parser.add_argument("--sr", type=int, default=16000, help="The threshold to split the songs")
+    parser.add_argument("--data", type=str, help="The path to the dataset")
+    parser.add_argument("--sr", type=int, default=16000, help="Sample rate")
     args = parser.parse_args()
     resample_dataset(args)

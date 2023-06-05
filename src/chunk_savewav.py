@@ -55,33 +55,35 @@ def derive_desired_wav(audio, old_fs, new_fs):
 
 
 def main(args):
+
     class_to_id = {}
     id_to_class = {}
     p = Path(args.data)
     singers = [entry.name for entry in p.iterdir() if entry.is_dir()]
     audio_list = sorted(glob.glob(os.path.join(args.data,"**/*.wav")))
 
+    # enumerate singers data
     for i, category in enumerate(singers):
         class_to_id[category] = i
         id_to_class[i] = category
 
-    # データとラベルの読み込み
     for singer in tqdm(singers):
         print("load singer: {}".format(singer))
         singer_path = os.path.join(args.data, singer)
         p = Path(singer_path)
         albums = sorted([entry.name for entry in p.iterdir() if entry.is_dir()])
         singer_label = class_to_id[singer]
+
         for albumnum, album in enumerate(albums):
             audio_list = sorted(glob.glob(os.path.join(args.data, singer, album, "*vocal.wav")))
             for songnum,file_path in enumerate(audio_list):
-                # データ，ラベルの読み込み
-                # audio, sr = librosa.load(file_path, sr=self.sr)
+
+                # load
                 audio, sr = torchaudio.load(file_path)
                 audio = derive_desired_wav(audio, sr, args.sr)
                 # print(audio.shape)
 
-                # チャンク（無音だけのファイルを除去）してデータにappend
+                # chunk audio data and append 
                 trimmed = chunk_audio(audio,args.length,sr,rms_filter=True)
                 label_for_trimmed = [singer_label for x in range(len(trimmed))]
                 for trimid, (w,l) in enumerate(zip(trimmed,label_for_trimmed)):
@@ -107,9 +109,9 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", type=str, default="/home/ubuntu/dataset/artist20", help="The path to the dataset")
-    parser.add_argument("--save", type=str, default="/home/ubuntu/dataset/artist20/chunk", help="The path to the dataset")
-    parser.add_argument("--sr", type=int, default=16000, help="The threshold to split the songs")
-    parser.add_argument("--length", type=float, default=5.0, help="The threshold to split the songs")
+    parser.add_argument("--data", type=str, help="The load path to the dataset")
+    parser.add_argument("--save", type=str, help="The save path to the dataset")
+    parser.add_argument("--sr", type=int, default=16000, help="sample rate")
+    parser.add_argument("--length", type=float, default=5.0, help="The length to split the songs")
     args = parser.parse_args()
     main(args)

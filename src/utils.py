@@ -3,11 +3,6 @@ import numpy as np
 
 import librosa
 
-"""
-utils.py 
-その他のちょっとした処理を書く
-"""
-
 
 # dict型のラベル-ID変換表を更新する
 def label_to_id(label, id_dict):

@@ -7,10 +7,6 @@ import glob
 from pathlib import Path
 import torchaudio
 
-"""
-dataio.py
-ファイルの入出力に関する処理を書く
-"""
 # class Artist(torch.utils.data.Dataset):
 #     def __init__(self, dir,sr=44100, chunk_length=5, set=[1,2,3,4,5,6]):
 #         self.sr = sr
@@ -108,6 +104,7 @@ class Artist(torch.utils.data.Dataset):
     def get_class_to_id(self):
         return self.class_to_id
     
+# if the data are saved as npyfile    
 class Artist_from_numpy(torch.utils.data.Dataset):
     def __init__(self, dir, sr=44100, chunk_length=5, set=[0,1,2,3,4,5,6], transforms=None):
         self.sr = sr
@@ -175,9 +172,11 @@ def torch_rms(y,
     rms = torch.sqrt(power.squeeze())
     return rms
 
+
 def rms_filtering(wav:np.ndarray, th=0.01):
     rms = torch_rms(wav)
     return torch.mean(rms) > th
+
 
 def chunk_audio(audio:torch.Tensor, chunk_length:int, sr, rms_filter=False):
     # Calculate number of samples per chunk

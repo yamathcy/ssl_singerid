@@ -10,10 +10,6 @@ import numpy as np
 from abc import abstractmethod
 # from torchsummary import summary
 
-"""
-model.py 
-学習に用いるモデルについてを書く
-"""
 
 class BaseModel(pl.LightningModule):
     """

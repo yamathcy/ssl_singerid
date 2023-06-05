@@ -21,41 +21,34 @@ import wandb
 main.py
 """
 
-'''+++'''
+
 
 #torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
-'''+++'''
 @hydra.main(config_name="config")
 def main(conf):
-    # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-    # os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
-    # # torch.set_float32_matmul_precision('high')
-
     # seed
     SEED = 42
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
-    # torch.use_deterministic_algorithms(True)
+    # torch.use_deterministic_algorithms(True)   # :bug it arises an unexpected bug of pytorch 
     pl.seed_everything(SEED)
     np.random.seed(SEED)
 
 
-    # logging
-    # wandb
+    # logging using wandb
+    # if use raw wandb
     # wandb.init(config=conf)
     logger = WandbLogger(name=conf.experiment_name, project="Singer Identification")
     logger.log_hyperparams(conf)
 
-    '''+++'''
     print(hydra.utils.get_original_cwd())
     dir = hydra.utils.get_original_cwd() + "/mlruns"
     if not os.path.exists(dir):
         os.makedirs(dir)
 
-    '''+++'''
     
-    # mlflow
+    # if use mlflow, remove commentout
     # mlflow.set_tracking_uri(dir)
     # # tracking_uri = mlflow.get_tracking_uri()
     # mlflow.set_experiment("singer_identification")
@@ -103,7 +96,7 @@ def main(conf):
         print(type(model))
     else:
         raise NotImplementedError
-    # Magic
+
     wandb.watch(model, log_freq=100)
 
     # test
@@ -123,14 +116,11 @@ def main(conf):
     #     model.train()
 
 
-    '''+++'''
     # train
     model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, conf=conf, logger=logger)
 
     # evaluation
     evaluation(model, test_loader, target_class, logger=logger)
-
-    '''+++'''
 
 
 if __name__ == "__main__":

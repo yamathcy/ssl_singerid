@@ -10,23 +10,15 @@ import matplotlib.pylab as plt
 import pandas as pd
 from tqdm import tqdm
 # import mlflow
-"""
-eval.py
-学習に用いるモデルについてを書く
-"""
+
 
 def evaluation(model, test_loader, target_class, logger:WandbLogger):
-    """
-    モデルとtrainer, test用のdataloaderを用いてテストデータでの評価を行う
-    :param model:
-    :param trainer:
-    :param test_loader:
-    :return:
-    """
     feature_vecs = []
     pred = []
     pre_prob = []
     label = []
+
+    # to visualize feature by umap, tsne, etc.
     print("visualize feature dump...")
     for sig, la in tqdm(test_loader):
         sig = sig.to("cuda")
@@ -41,6 +33,8 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
         pre_prob.append(prob)
         label.append(la)
         feature_vecs.append(feature)
+
+    # evaluation by sklearn
     pred = np.array(pred)
     pre_prob = np.array(pre_prob)
     label = np.array(label)
@@ -55,6 +49,7 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
     report_dict = classification_report(y_true=label, y_pred=pred, target_names=list(target_class.keys()), output_dict=True)
     print(report)
 
+    # visualize confusion matrix
     cf_data_d=confusion_matrix(label, pred)
     print(cf_data_d)
     df_cmx = pd.DataFrame(cf_data_d, index=target_class.keys(), columns=target_class.keys())
@@ -73,6 +68,7 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
     print("f1-score: {:.3f}".format(macrof1))
     # mlflow.log_artifact(key='confusion_matrix', images=['confusion_matrix.png'])
 
+    # write results
     with open("result.txt", 'a') as f:
         print("---Accuracy Report---", file=f)
         print("Overall accracy:{:.3f}".format(accuracy) ,file=f)
@@ -81,10 +77,16 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
         print("Top-3:{:.3f}".format(top_3),file=f)
         print("f1-score: {:.3f}".format(macrof1))
         print(report, file=f)
+
+    
+    # logging evaluation 
+
     # logger.use_artifact("result.txt", artifact_type='text')
     # mlflow.log_metrics({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
     logger.log_metrics({"acc":accuracy, "bacc":balanced, "top2":top_2, "top3":top_3, "f1":macrof1})
     logger.log_image(key='confusion_matrix', images=['confusion_matrix.png'])
+    
+    # logging each class
     for label_name, val in zip(report_dict.keys(), report_dict.values()):
         try:
             logger.log_metrics({"class_f1_" + label_name:val['f1-score']})
@@ -92,6 +94,7 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
         except:
             pass
     try:
+        # if the model has SSL model's layer weight mechanism
         lw = model.get_layer_weight()
         lw.squeeze()
         print(lw)
@@ -110,7 +113,7 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
 
 def single_test(model:torch.nn.Module, data):
     """
-    1つのデータをモデルに入力して推定結果を得る
+    
     :param model:
     :param data:
     :return:
