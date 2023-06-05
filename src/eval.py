@@ -77,7 +77,6 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
         print("Top-3:{:.3f}".format(top_3),file=f)
         print("f1-score: {:.3f}".format(macrof1))
         print(report, file=f)
-
     
     # logging evaluation 
 
@@ -121,7 +120,6 @@ def single_test(model:torch.nn.Module, data):
     model.eval()
     with torch.no_grad():
         output = model(data)
-        # todo: outputをtensorではなくidにする？
     return output
 
 
