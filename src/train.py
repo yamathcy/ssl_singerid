@@ -9,10 +9,6 @@ import wandb
 # from torchvision.utils import make_grid
 # from itertools import repeat
 # import pandas as pd
-"""
-train.py 
-モデルの学習に関する処理をここに書く
-"""
 
 # def inf_loop(data_loader):
 #     ''' wrapper function for endless data loader. '''
