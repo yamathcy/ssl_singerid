@@ -12,3 +12,4 @@ url: "microsoft/wavlm-base-plus"
 # fp: '32' # allow '32', 'bf16', '16'
 freeze_all: False
 early_stop: False
+weight_sum: False

@@ -92,7 +92,7 @@ def main(conf):
     if conf.model == "crnn":
         model = CRNN(conf, classes_num=20)
     elif conf.model == "ssl":
-        model = SSLNet(conf,class_num=20)
+        model = SSLNet(conf,class_num=20,weight_sum=conf.weight_sum)
         print(type(model))
     else:
         raise NotImplementedError

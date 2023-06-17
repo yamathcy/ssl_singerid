@@ -66,7 +66,50 @@ class BaseModel(pl.LightningModule):
         out = out.cpu().detach().numpy().copy()
         out = np.squeeze(out)
         return out
+    
 
+class HuggingfaceFrontend(nn.Module):
+    def __init__(self, url, use_last=False, encoder_size=12):
+        super().__init__()
+        self.model = AutoModel.from_pretrained(url, trust_remote_code=True)
+        self.use_last = use_last
+        if encoder_size == 12:
+            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(13), requires_grad=True)
+        elif encoder_size == 24:
+            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(25), requires_grad=True)
+
+    def forward(self,x):
+        x = self.model(x, output_hidden_states=True, return_dict=None, output_attentions=None)
+        if self.use_last:
+            h = x["last_hidden_state"]
+            pad_width = (0, 0, 0, 1)
+            h = F.pad(h, pad_width, mode='reflect')
+        else:
+            h = x["hidden_states"]
+            h = torch.stack(h, dim=3)
+            pad_width = (0, 0, 0, 0, 0, 1)
+            h = F.pad(h, pad_width, mode='reflect')
+        if not self.use_last:
+            weights = torch.softmax(self.layer_weights)
+            # x = x.transpose(1,3)  # (B, Emb, Time, Ch) * (Ch, 1)
+            h = torch.matmul(h, weights)
+        return h
+
+    def fix_parameter(self,freeze_all=False):
+        if freeze_all:
+            for param in self.model.parameters():
+                param.requires_grad = False
+        else:
+            self.model.feature_extractor._freeze_parameters()
+
+    def unfreeze_parameter(self):
+        for param in self.model.parameters():
+            param.requires_grad = True
+        self.model.feature_extractor._freeze_parameters()
+
+    def get_layer_weights(self):
+        return torch.softmax(self.layer_weights)
+    
 class CRNN(pl.LightningModule):
     """
     Baseline model 
@@ -197,27 +240,27 @@ class CRNN(pl.LightningModule):
         return out
 
 class Backend(nn.Module):
-    def __init__(self, class_size, encoder_size=12) -> None:
+    def __init__(self, class_size, encoder_size=12, frame=False) -> None:
         super().__init__()
         assert encoder_size == 12 or encoder_size == 24
         if encoder_size == 12:
-            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(13), requires_grad=True)
-            feature_dim = 768
+            self.feature_dim = 768
         elif encoder_size == 24:
-            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(25), requires_grad=True)
-            feature_dim = 1024
+            self.feature_dim = 1024
         else:
             raise NotImplementedError
-        self.proj  = nn.Linear(feature_dim, feature_dim)
+        self.proj = nn.Linear(self.feature_dim, self.feature_dim)
         self.dropout = nn.Dropout(0.5)
-        self.classifier=nn.Linear(feature_dim, class_size)
-        
-    def forward(self,x):
-        weights = torch.sigmoid(self.layer_weights)
-        # embeddings = embeddings.transpose(1,3)  # (B, Emb, Time, Ch) * (Ch, 1)
-        x = torch.matmul(x, weights)
+        self.classifier = nn.Linear(self.feature_dim, class_size)
+        self.frame = frame
+
+    def forward(self, x):
+        input_size = self.feature_dim
+        # if len(x.shape) == 4 and self.combine_dims:
+            # input_size = input_shape[2] * input_shape[3]
         x = self.proj(x)
-        x = x.mean(1, False)
+        if not self.frame:
+            x = x.mean(1, False)
         feature = x
         x = self.dropout(x)
         x = self.classifier(x)
@@ -228,6 +271,7 @@ class SSLNet(BaseModel):
                  conf,
                  weights:dict or list=None,
                  class_num=10,
+                 weight_sum=False
                  ):
         super().__init__()
 
@@ -241,10 +285,11 @@ class SSLNet(BaseModel):
         # else:
         #     self.resampler = nn.Identity()
         
-        self.frontend = AutoModel.from_pretrained(self.url, trust_remote_code=True,cache_dir='./hfmodels')
+        # self.frontend = AutoModel.from_pretrained(self.url, trust_remote_code=True,cache_dir='./hfmodels')
         
-        for p in self.frontend.parameters():
-            p.requires_grad = False
+        # for p in self.frontend.parameters():
+        #     p.requires_grad = False
+        self.frontend = HuggingfaceFrontend(url=self.url,use_last=(1-weight_sum),encoder_size=encode_size)
         self.backend = Backend(class_num, encoder_size=encode_size)
 
         self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
@@ -263,13 +308,13 @@ class SSLNet(BaseModel):
         x = x.squeeze(dim=1)
         # print(x.shape, type(x))
         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
-        x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
-        h = x["hidden_states"]
-        h = torch.stack(h, dim=3)
+        x = self.frontend(x)
+        # h = x["hidden_states"]
+        # h = torch.stack(h, dim=3)
         # pad_width = (0, 0, 0, 0, 0, 1)
         # h = F.pad(h, pad_width, mode='reflect')
         # print(h.shape)
-        out, feature = self.backend(h)
+        out, feature = self.backend(x)
         return out, feature
 
     def configure_optimizers(self, lr=1e-3):
