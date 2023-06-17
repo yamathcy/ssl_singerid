@@ -322,7 +322,7 @@ class SSLNet(BaseModel):
         return optimizer
     
     def get_layer_weight(self):
-        lw = torch.sigmoid(self.backend.layer_weights)
+        lw = torch.softmax(self.backend.layer_weights,dim=0)
         lw.detach().cpu().numpy().copy()
         return lw
     
