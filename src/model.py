@@ -68,47 +68,6 @@ class BaseModel(pl.LightningModule):
         return out
     
 
-class HuggingfaceFrontend(nn.Module):
-    def __init__(self, url, use_last=False, encoder_size=12):
-        super().__init__()
-        self.model = AutoModel.from_pretrained(url, trust_remote_code=True)
-        self.use_last = use_last
-        if encoder_size == 12:
-            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(13), requires_grad=True)
-        elif encoder_size == 24:
-            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(25), requires_grad=True)
-
-    def forward(self,x):
-        x = self.model(x, output_hidden_states=True, return_dict=None, output_attentions=None)
-        if self.use_last:
-            h = x["last_hidden_state"]
-            pad_width = (0, 0, 0, 1)
-            h = F.pad(h, pad_width, mode='reflect')
-        else:
-            h = x["hidden_states"]
-            h = torch.stack(h, dim=3)
-            pad_width = (0, 0, 0, 0, 0, 1)
-            h = F.pad(h, pad_width, mode='reflect')
-        if not self.use_last:
-            weights = torch.softmax(self.layer_weights,dim=0)
-            # x = x.transpose(1,3)  # (B, Emb, Time, Ch) * (Ch, 1)
-            h = torch.matmul(h, weights)
-        return h
-
-    def fix_parameter(self,freeze_all=False):
-        if freeze_all:
-            for param in self.model.parameters():
-                param.requires_grad = False
-        else:
-            self.model.feature_extractor._freeze_parameters()
-
-    def unfreeze_parameter(self):
-        for param in self.model.parameters():
-            param.requires_grad = True
-        self.model.feature_extractor._freeze_parameters()
-
-    def get_layer_weights(self):
-        return torch.softmax(self.layer_weights,dim=0)
     
 class CRNN(pl.LightningModule):
     """
@@ -239,6 +198,51 @@ class CRNN(pl.LightningModule):
         out = np.squeeze(out)
         return out
 
+
+class HuggingfaceFrontend(nn.Module):
+    def __init__(self, url, use_last=False, encoder_size=12):
+        super().__init__()
+        self.model = AutoModel.from_pretrained(url, trust_remote_code=True)
+        self.use_last = use_last
+        if encoder_size == 12:
+            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(13), requires_grad=True)
+        elif encoder_size == 24:
+            self.layer_weights = torch.nn.parameter.Parameter(data=torch.ones(25), requires_grad=True)
+
+    def forward(self,x):
+        x = self.model(x, output_hidden_states=True, return_dict=None, output_attentions=None)
+        if self.use_last:
+            h = x["last_hidden_state"]
+            pad_width = (0, 0, 0, 1)
+            h = F.pad(h, pad_width, mode='reflect')
+        else:
+            h = x["hidden_states"]
+            h = torch.stack(h, dim=3)
+            pad_width = (0, 0, 0, 0, 0, 1)
+            h = F.pad(h, pad_width, mode='reflect')
+        if not self.use_last:
+            weights = torch.softmax(self.layer_weights,dim=0)
+            # x = x.transpose(1,3)  # (B, Emb, Time, Ch) * (Ch, 1)
+            h = torch.matmul(h, weights)
+        return h, weights
+
+    def fix_parameter(self,freeze_all=False):
+        if freeze_all:
+            for param in self.model.parameters():
+                param.requires_grad = False
+        else:
+            self.model.feature_extractor._freeze_parameters()
+
+    def unfreeze_parameter(self):
+        for param in self.model.parameters():
+            param.requires_grad = True
+        self.model.feature_extractor._freeze_parameters()
+
+    def get_layer_weights(self):
+        lw = torch.softmax(self.layer_weights,dim=0)
+        lw = lw.detach().cpu().numpy().copy()
+        return lw
+
 class Backend(nn.Module):
     def __init__(self, class_size, encoder_size=12, frame=False) -> None:
         super().__init__()
@@ -308,28 +312,28 @@ class SSLNet(BaseModel):
         x = x.squeeze(dim=1)
         # print(x.shape, type(x))
         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
-        x = self.frontend(x)
+        x, weights = self.frontend(x)
         # h = x["hidden_states"]
         # h = torch.stack(h, dim=3)
         # pad_width = (0, 0, 0, 0, 0, 1)
         # h = F.pad(h, pad_width, mode='reflect')
         # print(h.shape)
         out, feature = self.backend(x)
-        return out, feature
+        return out, feature, weights
 
     def configure_optimizers(self, lr=1e-3):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
     
-    def get_layer_weight(self):
-        lw = torch.softmax(self.backend.layer_weights,dim=0)
-        lw.detach().cpu().numpy().copy()
-        return lw
+    # def get_layer_weight(self):
+    #     lw = torch.softmax(self.backend.layer_weights,dim=0)
+    #     lw.detach().cpu().numpy().copy()
+    #     return lw
     
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         # print(x.shape)
-        out,_ = self(x)
+        out,_, _ = self(x)
         loss = F.cross_entropy(out, y)
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', self.train_acc(out, y), on_step=False, on_epoch=True)
@@ -337,7 +341,7 @@ class SSLNet(BaseModel):
 
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
-        out,_ = self(x)
+        out,_,_ = self(x)
         loss = F.cross_entropy(out, y)
         self.log('val_loss', loss, on_epoch=True, on_step=False)
         self.log('val_acc', self.val_acc(out, y), on_step=False, on_epoch=True)
@@ -345,7 +349,7 @@ class SSLNet(BaseModel):
 
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
-        out,_ = self(x)
+        out,_,_ = self(x)
         self.log('test_accuracy', self.test_acc(out,y), on_epoch=True, on_step=False)
         self.log('test_f1', self.test_f1(out, y), on_epoch=True, on_step=False)
         self.log('test_top2_accuracy', self.test_top2(out, y), on_epoch=True, on_step=False)
@@ -357,6 +361,11 @@ class SSLNet(BaseModel):
             for p in self.frontend.parameters():
                 p.requires_grad = True
                 self.frontend.feature_extractor._freeze_parameters()
+    
+    def on_test_end(self):
+        lw = self.frontend.get_layer_weights()
+        for num,i in enumerate(lw):
+            self.log('layer_weight_{}'.format(num), i, on_epoch=False, on_step=False)
 
 
 class SSLNet_RAW(nn.Module):
