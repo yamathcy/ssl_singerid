@@ -93,7 +93,9 @@ def main(conf):
         model = CRNN(conf, classes_num=20)
     elif conf.model == "ssl":
         model = SSLNet(conf,class_num=20,weight_sum=conf.weight_sum)
+        lw = model.frontend.get_layer_weights()
         print(type(model))
+        print(lw)
     else:
         raise NotImplementedError
 
