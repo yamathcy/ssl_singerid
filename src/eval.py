@@ -95,7 +95,7 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
     try:
         # if the model has SSL model's layer weight mechanism
         lw = model.get_layer_weight()
-        lw.squeeze()
+        # lw.squeeze()
         print(lw)
         plt.plot(lw)
         plt.tight_layout()
@@ -107,7 +107,6 @@ def evaluation(model, test_loader, target_class, logger:WandbLogger):
         pass
 
     return accuracy, balanced, top_2, top_3, df_cmx, report_dict
-
 
 
 def single_test(model:torch.nn.Module, data):
