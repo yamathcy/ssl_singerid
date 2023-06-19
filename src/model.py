@@ -66,9 +66,7 @@ class BaseModel(pl.LightningModule):
         out = out.cpu().detach().numpy().copy()
         out = np.squeeze(out)
         return out
-    
 
-    
 class CRNN(pl.LightningModule):
     """
     Baseline model 
@@ -368,73 +366,73 @@ class SSLNet(BaseModel):
             self.log('layer_weight_{}'.format(num), i, on_epoch=False, on_step=False)
 
 
-class SSLNet_RAW(nn.Module):
-    def __init__(self,
-                 conf,
-                 weights:dict or list=None,
-                 url="microsoft/wavlm-base-plus",
-                 class_num=10,
-                 freeze_all=False
-                 ):
+# class SSLNet_RAW(nn.Module):
+#     def __init__(self,
+#                  conf,
+#                  weights:dict or list=None,
+#                  url="microsoft/wavlm-base-plus",
+#                  class_num=10,
+#                  freeze_all=False
+#                  ):
         
-        super().__init__()
-        self.conf = conf
-        self.num_classes = class_num
-        self.lr = conf.lr
-        encode_size = 24 if "large" in url else 12
-        # if param.sr != 16000:
-        #     self.resampler = torchaudio.transforms.Resample(orig_freq=param.sr, new_freq=16000)
-        # else:
-        #     self.resampler = nn.Identity()
-        self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True, cache_dir='./hfmodels')
+#         super().__init__()
+#         self.conf = conf
+#         self.num_classes = class_num
+#         self.lr = conf.lr
+#         encode_size = 24 if "large" in url else 12
+#         # if param.sr != 16000:
+#         #     self.resampler = torchaudio.transforms.Resample(orig_freq=param.sr, new_freq=16000)
+#         # else:
+#         #     self.resampler = nn.Identity()
+#         self.frontend = AutoModel.from_pretrained(url, trust_remote_code=True, cache_dir='./hfmodels')
         
 
-        for p in self.frontend.parameters():
-            p.requires_grad = False
+#         for p in self.frontend.parameters():
+#             p.requires_grad = False
         
-        self.backend = Backend(class_num, encoder_size=encode_size)
+#         self.backend = Backend(class_num, encoder_size=encode_size)
 
-        self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
-        self.val_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
-        self.test_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
-        self.test_top2 = Accuracy(num_classes=self.num_classes, average='macro', top_k=2, task='multiclass')
-        self.test_top3 = Accuracy(num_classes=self.num_classes, average='macro', top_k=3, task='multiclass')
-        self.test_f1 = F1Score(num_classes=self.num_classes, average='macro', task='multiclass')
-        self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
-        # class_weights = [float(x) for x in weights.values()]
-        # self.class_weights = torch.from_numpy(np.array(class_weights)).float()
+#         self.train_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+#         self.val_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+#         self.test_acc = Accuracy(num_classes=self.num_classes, average='macro', task='multiclass')
+#         self.test_top2 = Accuracy(num_classes=self.num_classes, average='macro', top_k=2, task='multiclass')
+#         self.test_top3 = Accuracy(num_classes=self.num_classes, average='macro', top_k=3, task='multiclass')
+#         self.test_f1 = F1Score(num_classes=self.num_classes, average='macro', task='multiclass')
+#         self.confusion = ConfusionMatrix(num_classes=self.num_classes, task='multiclass')
+#         # class_weights = [float(x) for x in weights.values()]
+#         # self.class_weights = torch.from_numpy(np.array(class_weights)).float()
 
-    def forward(self, x):
-        # print(x.shape)
-        x = x.squeeze(dim=1)
-        # print(x.shape, type(x))
-        # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
-        x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
-        h = x["hidden_states"]
-        h = torch.stack(h, dim=3)
-        # pad_width = (0, 0, 0, 0, 0, 1)
-        # h = F.pad(h, pad_width, mode='reflect')
-        # print(h.shape)
-        out, feature = self.backend(h)
-        return out, feature
+#     def forward(self, x):
+#         # print(x.shape)
+#         x = x.squeeze(dim=1)
+#         # print(x.shape, type(x))
+#         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
+#         x = self.frontend(x, output_hidden_states=True, return_dict=None, output_attentions=None)
+#         h = x["hidden_states"]
+#         h = torch.stack(h, dim=3)
+#         # pad_width = (0, 0, 0, 0, 0, 1)
+#         # h = F.pad(h, pad_width, mode='reflect')
+#         # print(h.shape)
+#         out, feature = self.backend(h)
+#         return out, feature
 
-    def configure_optimizers(self, lr=1e-3):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-        return optimizer
+#     def configure_optimizers(self, lr=1e-3):
+#         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+#         return optimizer
     
-    def get_layer_weight(self):
-        lw = torch.softmax(torch.squeeze(self.backend.layer_weights), dim=0)
-        lw = lw.detach().cpu().numpy()
-        return lw
+#     def get_layer_weight(self):
+#         lw = torch.softmax(self.backend.layer_weights, dim=0)
+#         lw = lw.detach().cpu().numpy()
+#         return lw
 
-    def on_training_epoch_start(self):
+#     def on_training_epoch_start(self):
         
-        if (self.current_epoch > self.conf.lin_epoch):
-            print("finetune epoch")
-            for p in self.frontend.parameters():
-                self.lr=5e-5
-                p.requires_grad = True
-                self.frontend.feature_extractor._freeze_parameters()
-        else:
-            print("probe ep")
+#         if (self.current_epoch > self.conf.lin_epoch):
+#             print("finetune epoch")
+#             for p in self.frontend.parameters():
+#                 self.lr=5e-5
+#                 p.requires_grad = True
+#                 self.frontend.feature_extractor._freeze_parameters()
+#         else:
+#             print("probe ep")
 
