@@ -83,9 +83,9 @@ def main(conf):
     target_class = train_data.get_class_to_id()
 
     # dataloader
-    train_loader = DataLoader(train_data, batch_size=conf.batch_size, shuffle=True)
-    valid_loader = DataLoader(valid_data, batch_size=16, shuffle=False)
-    test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
+    train_loader = DataLoader(train_data, batch_size=conf.batch_size, shuffle=True,num_workers=2)
+    valid_loader = DataLoader(valid_data, batch_size=16, shuffle=False,num_workers=2)
+    test_loader = DataLoader(test_data, batch_size=1, shuffle=False,num_workers=2)
 
     # model
     # parameter
