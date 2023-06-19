@@ -90,7 +90,7 @@ class HuggingfaceFrontend(nn.Module):
             pad_width = (0, 0, 0, 0, 0, 1)
             h = F.pad(h, pad_width, mode='reflect')
         if not self.use_last:
-            weights = torch.softmax(self.layer_weights)
+            weights = torch.softmax(self.layer_weights,dim=0)
             # x = x.transpose(1,3)  # (B, Emb, Time, Ch) * (Ch, 1)
             h = torch.matmul(h, weights)
         return h
@@ -108,7 +108,7 @@ class HuggingfaceFrontend(nn.Module):
         self.model.feature_extractor._freeze_parameters()
 
     def get_layer_weights(self):
-        return torch.softmax(self.layer_weights)
+        return torch.softmax(self.layer_weights,dim=0)
     
 class CRNN(pl.LightningModule):
     """
