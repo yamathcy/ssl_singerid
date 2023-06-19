@@ -124,7 +124,7 @@ def main(conf):
     print(lw)
     with open("layer_weight.txt", 'a') as f:
         lw = model.frontend.get_layer_weights()
-        print(file=f)
+        print(lw,file=f)
     # evaluation
     evaluation(model, test_loader, target_class, logger=logger)
 
