@@ -224,7 +224,7 @@ class HuggingfaceFrontend(nn.Module):
             weights = torch.softmax(self.layer_weights,dim=0)
             # x = x.transpose(1,3)  # (B, Emb, Time, Ch) * (Ch, 1)
             h = torch.matmul(h, weights)
-        return h, weights
+        return h
 
     def fix_parameter(self,freeze_all=False):
         if freeze_all:
@@ -312,14 +312,14 @@ class SSLNet(BaseModel):
         x = x.squeeze(dim=1)
         # print(x.shape, type(x))
         # x = x.to(DEVICE) # FIXME: Unknown behaviour on return to cpu by feature extractor
-        x, weights = self.frontend(x)
+        x = self.frontend(x)
         # h = x["hidden_states"]
         # h = torch.stack(h, dim=3)
         # pad_width = (0, 0, 0, 0, 0, 1)
         # h = F.pad(h, pad_width, mode='reflect')
         # print(h.shape)
         out, feature = self.backend(x)
-        return out, feature, weights
+        return out, feature
 
     def configure_optimizers(self, lr=1e-3):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
@@ -333,7 +333,7 @@ class SSLNet(BaseModel):
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         # print(x.shape)
-        out,_, _ = self(x)
+        out, _ = self(x)
         loss = F.cross_entropy(out, y)
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', self.train_acc(out, y), on_step=False, on_epoch=True)
@@ -341,7 +341,7 @@ class SSLNet(BaseModel):
 
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
-        out,_,_ = self(x)
+        out,_ = self(x)
         loss = F.cross_entropy(out, y)
         self.log('val_loss', loss, on_epoch=True, on_step=False)
         self.log('val_acc', self.val_acc(out, y), on_step=False, on_epoch=True)
@@ -349,7 +349,7 @@ class SSLNet(BaseModel):
 
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
-        out,_,_ = self(x)
+        out,_= self(x)
         self.log('test_accuracy', self.test_acc(out,y), on_epoch=True, on_step=False)
         self.log('test_f1', self.test_f1(out, y), on_epoch=True, on_step=False)
         self.log('test_top2_accuracy', self.test_top2(out, y), on_epoch=True, on_step=False)
