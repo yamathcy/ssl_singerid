@@ -360,10 +360,10 @@ class SSLNet(BaseModel):
                 p.requires_grad = True
                 self.frontend.feature_extractor._freeze_parameters()
     
-    def on_test_epoch_start(self) -> None:
-        lw = self.frontend.get_layer_weights()
-        for num,i in enumerate(lw):
-            self.log('layer_weight_{}'.format(num), i, on_epoch=False, on_step=False)
+    # def on_test_epoch_start(self) -> None:
+    #     lw = self.frontend.get_layer_weights()
+    #     for num,i in enumerate(lw):
+    #         self.log('layer_weight_{}'.format(num), i, on_epoch=False, on_step=False)
 
 
 # class SSLNet_RAW(nn.Module):

@@ -120,7 +120,11 @@ def main(conf):
 
     # train
     model, trainer = train(model, train_loader=train_loader, valid_loader=valid_loader, conf=conf, logger=logger)
-
+    lw = model.frontend.get_layer_weights()
+    print(lw)
+    with open("layer_weight.txt", 'a') as f:
+        lw = model.frontend.get_layer_weights()
+        print(file=f)
     # evaluation
     evaluation(model, test_loader, target_class, logger=logger)
 
